@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"pkg/api"
+	"teko_game/pkg/netcode"
 
 	"google.golang.org/grpc"
 )
@@ -12,11 +12,11 @@ import (
 func main() {
 
 	conn, err := grpc.Dial(":8080", grpc.WithInsecure())
-	if err != nil {
+	if err != nil 
 		log.Fatal(err)
 	}
 
-	c := api.NewGameComClient(conn)
+	c := netcode.NewGameComClient(conn)
 
 	c.SetGroupPseudonym(context.Background())
 
