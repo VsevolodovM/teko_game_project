@@ -60,8 +60,19 @@ func (bot *Bot) opponentInfo() error {
 	return nil
 }
 
-func (bot *Bot) getGameState(client netcode.GameComClient) {
+func (bot *Bot) getGameState() {
+	request := netcode.MatchIDPacket{
+		UserToken:  bot.UserToken,
+		MatchToken: bot.MatchToken,
+	}
 
+	response, err := bot.Client.GetGameState(context.Background(), &request)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(response)
 }
 
 func (bot *Bot) game() {
