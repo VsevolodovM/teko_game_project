@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"log"
+
+	//"teko_game/game"
 	"teko_game/pkg/netcode"
+	//"teko_game/pkg/tko"
 
 	"google.golang.org/grpc"
 )
@@ -19,7 +22,7 @@ func main() {
 	// matr_number := ""
 	// secret := ""
 
-	autpack := &netcode.AuthPacket{MatrNumber: 12344, Secret: mgmmf}
+	autpack := &netcode.AuthPacket{MatrNumber: "12344", Secret: "mgmmf"}
 
 	c.SetGroupPseudonym(context.Background(), &netcode.SetPseudonymRequest{Auth: autpack, Pseudonym: "Máo Zédōng_Team"})
 
