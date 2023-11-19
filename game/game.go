@@ -9,23 +9,41 @@ import (
 	"teko_game/pkg/tko"
 )
 
-var user_token = "1234"
-var match_token = ""
+type Bot struct {
+	MatchToken        string
+	Elo               int
+	UserToken         string
+	Wins              int
+	Loses             int
+	GameServerAddress string
+	SetUpChannel      string
+	Client            string
+}
 
-func NM(c netcode.GameComClient) {
+func NewBot(userToken string) *Bot {
+	return &Bot{
+		UserToken: userToken,
+	}
+}
 
+func (b *Bot) newMatch(c netcode.GameComClient) {
 	params := tko.GameParameter{}
 	p := netcode.MatchRequest_TkoGameParameters{TkoGameParameters: &params}
-	request := netcode.MatchRequest{UserToken: user_token, GameToken: "tko", TimeoutSuggestionSeconds: 3600, GameParameters: &p}
+	request := netcode.MatchRequest{
+		UserToken:                b.UserToken,
+		GameToken:                "tko",
+		TimeoutSuggestionSeconds: 3600,
+		GameParameters:           &p,
+	}
 	response, err := c.NewMatch(context.Background(), &request)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print("NewMatch:", response.MatchToken)
-	fmt.Print("First Player?:", response.BeginningPlayer)
-	match_token = response.MatchToken
+	fmt.Println("NewMatch:", response.MatchToken)
+	fmt.Println("First Player?:", response.BeginningPlayer)
+	b.MatchToken = response.MatchToken
 }
 
-func game() {
+func (b *Bot) game() {
 
 }
