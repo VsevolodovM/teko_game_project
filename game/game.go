@@ -17,7 +17,7 @@ type Bot struct {
 	Loses             int
 	GameServerAddress string
 	SetUpChannel      string
-	Client            string
+	Client            netcode.GameComClient
 }
 
 func NewBot(userToken string) *Bot {
@@ -26,24 +26,44 @@ func NewBot(userToken string) *Bot {
 	}
 }
 
-func (b *Bot) newMatch(c netcode.GameComClient) {
+func (bot *Bot) newMatch() {
 	params := tko.GameParameter{}
 	p := netcode.MatchRequest_TkoGameParameters{TkoGameParameters: &params}
 	request := netcode.MatchRequest{
-		UserToken:                b.UserToken,
+		UserToken:                bot.UserToken,
 		GameToken:                "tko",
 		TimeoutSuggestionSeconds: 3600,
 		GameParameters:           &p,
 	}
-	response, err := c.NewMatch(context.Background(), &request)
+	response, err := bot.Client.NewMatch(context.Background(), &request)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("NewMatch:", response.MatchToken)
 	fmt.Println("First Player?:", response.BeginningPlayer)
-	b.MatchToken = response.MatchToken
+	bot.MatchToken = response.MatchToken
 }
 
-func (b *Bot) game() {
+func (bot *Bot) opponentInfo() error {
+	request := netcode.MatchIDPacket{
+		UserToken:  bot.UserToken,
+		MatchToken: bot.MatchToken,
+	}
 
+	response, err := bot.Client.GetOpponentInfo(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(response)
+
+	return nil
+}
+
+func (bot *Bot) getGameState(client netcode.GameComClient) {
+
+}
+
+func (bot *Bot) game() {
+	// Implement the game logic here
 }
