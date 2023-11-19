@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
+
+	"google.golang.org/grpc"
 )
 
 type Bot struct {
@@ -16,24 +17,24 @@ type Bot struct {
 	Wins              int
 	Loses             int
 	GameServerAddress string
-	SetUpChannel      string
 	Client            netcode.GameComClient
+	MatchIDPacket     netcode.MatchIDPacket
 }
 
-func NewBot(userToken string) *Bot {
+func NewBot(userToken string, Channel *grpc.ClientConn) *Bot {
 	return &Bot{
 		UserToken: userToken,
+		Client:    netcode.NewGameComClient(Channel),
 	}
 }
 
 func (bot *Bot) newMatch() {
-	params := tko.GameParameter{}
-	p := netcode.MatchRequest_TkoGameParameters{TkoGameParameters: &params}
+	params := netcode.MatchRequest_TkoGameParameters{TkoGameParameters: &tko.GameParameter{}}
 	request := netcode.MatchRequest{
 		UserToken:                bot.UserToken,
 		GameToken:                "tko",
 		TimeoutSuggestionSeconds: 3600,
-		GameParameters:           &p,
+		GameParameters:           &params,
 	}
 	response, err := bot.Client.NewMatch(context.Background(), &request)
 	if err != nil {
@@ -42,15 +43,11 @@ func (bot *Bot) newMatch() {
 	fmt.Println("NewMatch:", response.MatchToken)
 	fmt.Println("First Player?:", response.BeginningPlayer)
 	bot.MatchToken = response.MatchToken
+	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: bot.MatchToken}
 }
 
 func (bot *Bot) opponentInfo() error {
-	request := netcode.MatchIDPacket{
-		UserToken:  bot.UserToken,
-		MatchToken: bot.MatchToken,
-	}
-
-	response, err := bot.Client.GetOpponentInfo(context.Background(), &request)
+	response, err := bot.Client.GetOpponentInfo(context.Background(), &bot.MatchIDPacket)
 	if err != nil {
 		return err
 	}
@@ -61,12 +58,7 @@ func (bot *Bot) opponentInfo() error {
 }
 
 func (bot *Bot) getGameState() {
-	request := netcode.MatchIDPacket{
-		UserToken:  bot.UserToken,
-		MatchToken: bot.MatchToken,
-	}
-
-	response, err := bot.Client.GetGameState(context.Background(), &request)
+	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
 
 	if err != nil {
 		log.Fatal(err)
