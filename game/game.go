@@ -69,7 +69,7 @@ func (bot *Bot) OpponentInfo() error {
 	return nil
 }
 
-func (bot *Bot) GetGameState() []int {
+func (bot *Bot) GetGameState() []int32 {
 	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
 	if err != nil {
 		return nil
@@ -77,13 +77,8 @@ func (bot *Bot) GetGameState() []int {
 
 	int32Values := response.GetTkoGameState().GetBoard()
 
-	var intValues []int
-	for _, v := range int32Values {
-		intValues = append(intValues, int(v))
-	}
-
-	fmt.Println("Array:", intValues)
-	return intValues
+	fmt.Println("Array:", int32Values)
+	return int32Values
 }
 
 func (bot *Bot) AbortMatch() {
