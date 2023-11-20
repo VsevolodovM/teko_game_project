@@ -21,16 +21,27 @@ type Bot struct {
 	GameServerAddress string
 	Client            netcode.GameComClient
 	MatchIDPacket     netcode.MatchIDPacket
+	AuthPacket        netcode.AuthPacket
 }
 
 func NewBot(userToken string, Channel *grpc.ClientConn) *Bot {
 	return &Bot{
-		UserToken: userToken,
-		Client:    netcode.NewGameComClient(Channel),
+		UserToken:  userToken,
+		Client:     netcode.NewGameComClient(Channel),
+		AuthPacket: netcode.AuthPacket{MatrNumber: "11824691", Secret: "Iqzwersolonew15_"},
 	}
 }
 
-func (bot *Bot) newMatch() {
+func (bot *Bot) GetUserTokenBot() string {
+	response, err := bot.Client.GetUserToken(context.Background(), &bot.AuthPacket)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return response.UserToken
+}
+
+func (bot *Bot) NewMatch() {
 	params := netcode.MatchRequest_TkoGameParameters{TkoGameParameters: &tko.GameParameter{}}
 	request := netcode.MatchRequest{
 		UserToken:                bot.UserToken,
@@ -48,7 +59,7 @@ func (bot *Bot) newMatch() {
 	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: bot.MatchToken}
 }
 
-func (bot *Bot) opponentInfo() error {
+func (bot *Bot) OpponentInfo() error {
 	response, err := bot.Client.GetOpponentInfo(context.Background(), &bot.MatchIDPacket)
 	if err != nil {
 		return err
@@ -59,7 +70,7 @@ func (bot *Bot) opponentInfo() error {
 	return nil
 }
 
-func (bot *Bot) getGameState() {
+func (bot *Bot) GetGameState() {
 	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
 
 	if err != nil {
@@ -69,7 +80,7 @@ func (bot *Bot) getGameState() {
 	fmt.Println(response)
 }
 
-func (bot *Bot) submitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
+func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 	tko_game_turn := tko.GameTurn{
 		X1: x1,
 		Y1: y1,
@@ -95,8 +106,12 @@ func (bot *Bot) submitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 	fmt.Println(response)
 }
 
-func (bot *Bot) autoPlay() error {
-	bot.newMatch()
+func (bot *Bot) AutoPlay() error {
+	// Finding match newMatch:
+	// - Waiting for the match to start. while response != OK
+	// -
+
+	bot.NewMatch()
 
 	err := bot.waitMatchStarted()
 	if err != nil {
