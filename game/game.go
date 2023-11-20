@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -93,6 +95,46 @@ func (bot *Bot) submitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 	fmt.Println(response)
 }
 
-func (bot *Bot) game() {
-	// Implement the game logic here
+func (bot *Bot) autoPlay() error {
+	bot.newMatch()
+
+	err := bot.waitMatchStarted()
+	if err != nil {
+		return err
+	}
+
+	for {
+		gameState, _, err := bot.getGameState()
+		if err != nil {
+			return err
+		}
+
+		boardSize := len(gameState.Board)
+		lastIndex := uint32(boardSize - 1)
+
+		if rand.Intn(2) == 0 {
+			err := bot.submitTurn(lastIndex, lastIndex, lastIndex, lastIndex)
+			if err != nil {
+				return err
+			}
+		} else {
+			x1 := uint32(rand.Intn(boardSize))
+			y1 := uint32(rand.Intn(boardSize))
+			x2 := uint32(rand.Intn(boardSize))
+			y2 := uint32(rand.Intn(boardSize))
+
+			err := bot.submitTurn(x1, y1, x2, y2)
+			if err != nil {
+				return err
+			}
+		}
+
+		time.Sleep(2 * time.Second)
+
+		if gameState.GameOver {
+			break
+		}
+	}
+
+	return nil
 }
