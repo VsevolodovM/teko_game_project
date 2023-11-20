@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
 	"time"
@@ -70,8 +69,25 @@ func (bot *Bot) OpponentInfo() error {
 	return nil
 }
 
-func (bot *Bot) GetGameState() {
+func (bot *Bot) GetGameState() []int {
 	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
+	if err != nil {
+		return nil
+	}
+
+	int32Values := response.GetTkoGameState().GetBoard()
+
+	var intValues []int
+	for _, v := range int32Values {
+		intValues = append(intValues, int(v))
+	}
+
+	fmt.Println("Array:", intValues)
+	return intValues
+}
+
+func (bot *Bot) AbortMatch() {
+	response, err := bot.Client.AbortMatch(context.Background(), &bot.MatchIDPacket)
 
 	if err != nil {
 		log.Fatal(err)
@@ -109,47 +125,50 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 func (bot *Bot) AutoPlay() error {
 	// Finding match newMatch:
 	// - Waiting for the match to start. while response != OK
-	// -
 
 	bot.NewMatch()
+	time.Sleep(3 * time.Second)
 
-	err := bot.waitMatchStarted()
-	if err != nil {
-		return err
-	}
+	bot.GetGameState()
+	time.Sleep(3 * time.Second)
 
-	for {
-		gameState, _, err := bot.getGameState()
-		if err != nil {
-			return err
-		}
+	// err := bot.waitMatchStarted()
+	// if err != nil {
+	// 	return err
+	// }
 
-		boardSize := len(gameState.Board)
-		lastIndex := uint32(boardSize - 1)
+	// for {
+	// 	gameState, _, err := bot.getGameState()
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if rand.Intn(2) == 0 {
-			err := bot.submitTurn(lastIndex, lastIndex, lastIndex, lastIndex)
-			if err != nil {
-				return err
-			}
-		} else {
-			x1 := uint32(rand.Intn(boardSize))
-			y1 := uint32(rand.Intn(boardSize))
-			x2 := uint32(rand.Intn(boardSize))
-			y2 := uint32(rand.Intn(boardSize))
+	// 	boardSize := len(gameState.Board)
+	// 	lastIndex := uint32(boardSize - 1)
 
-			err := bot.submitTurn(x1, y1, x2, y2)
-			if err != nil {
-				return err
-			}
-		}
+	// 	if rand.Intn(2) == 0 {
+	// 		err := bot.submitTurn(lastIndex, lastIndex, lastIndex, lastIndex)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	} else {
+	// 		x1 := uint32(rand.Intn(boardSize))
+	// 		y1 := uint32(rand.Intn(boardSize))
+	// 		x2 := uint32(rand.Intn(boardSize))
+	// 		y2 := uint32(rand.Intn(boardSize))
 
-		time.Sleep(2 * time.Second)
+	// 		err := bot.submitTurn(x1, y1, x2, y2)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	}
 
-		if gameState.GameOver {
-			break
-		}
-	}
+	// 	time.Sleep(2 * time.Second)
+
+	// 	if gameState.GameOver {
+	// 		break
+	// 	}
+	// }
 
 	return nil
 }
