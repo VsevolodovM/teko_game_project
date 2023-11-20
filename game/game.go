@@ -67,6 +67,32 @@ func (bot *Bot) getGameState() {
 	fmt.Println(response)
 }
 
+func (bot *Bot) submitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
+	tko_game_turn := tko.GameTurn{
+		X1: x1,
+		Y1: y1,
+		X2: x2,
+		Y2: y2,
+	}
+
+	game_turn := netcode.TurnRequest_TkoGameTurn{
+		TkoGameTurn: &tko_game_turn,
+	}
+
+	request := netcode.TurnRequest{
+		MatchId:  &bot.MatchIDPacket,
+		GameTurn: &game_turn,
+	}
+
+	response, err := bot.Client.SubmitTurn(context.Background(), &request)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(response)
+}
+
 func (bot *Bot) game() {
 	// Implement the game logic here
 }
