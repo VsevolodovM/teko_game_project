@@ -89,6 +89,7 @@ func (bot *Bot) GetGameStateArray() []int32 {
 
 	int32Values := response.GetTkoGameState().GetBoard()
 
+	fmt.Println("Array:", int32Values)
 	return int32Values
 }
 
@@ -139,114 +140,95 @@ func (bot *Bot) AutoPlay() error {
 	bot.NewMatch()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
-	fmt.Println("We are playing against: ", bot.OpponentInfo())
-	turn := 0 // 4
-	opponentWait := 0
-
+	turn := 0
+	opponent_wait := 0
+	var pos int32
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
 		switch codeFromServer {
 		case 0:
-			var pos int32
+			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
+			var possible_directions []int32
 			game_state := bot.GetGameStateArray()
-
 			if turn < 4 {
-				var x, y uint32
-
-				switch turn {
-				case 0:
-					pos = 11
-					break
-				case 1:
-					pos = 15
-					break
-				case 2:
-					pos = 17
-					break
-				case 3:
-					pos = 21
-					break
-				}
-				if game_state[pos] != 0 {
-					randomPos := logic.ChooseRandomPlace(game_state, 0)
-					x, y = logic.OneDtotwoD(randomPos)
-				} else {
-					x, y = logic.OneDtotwoD(int32(pos))
-				}
-				bot.SubmitTurn(0, 0, x, y)
+				x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
+				bot.SubmitTurn(0, 0, uint32(x), uint32(y))
 			} else {
 				if bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 1)
-				} else {
+					if pos+1 <= 24 && game_state[pos+1] == 0 {
+						possible_directions = append(possible_directions, 1)
+					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+						possible_directions = append(possible_directions, -1)
+					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+						possible_directions = append(possible_directions, 5)
+					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+						possible_directions = append(possible_directions, -5)
+					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+						possible_directions = append(possible_directions, 4)
+					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+						possible_directions = append(possible_directions, -4)
+					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+						possible_directions = append(possible_directions, +6)
+					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+						possible_directions = append(possible_directions, -6)
+					}
+
+				} else if !bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 2)
+					if pos+1 <= 24 && game_state[pos+1] == 0 {
+						possible_directions = append(possible_directions, 1)
+					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+						possible_directions = append(possible_directions, -1)
+					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+						possible_directions = append(possible_directions, 5)
+					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+						possible_directions = append(possible_directions, -5)
+					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+						possible_directions = append(possible_directions, 4)
+					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+						possible_directions = append(possible_directions, -4)
+					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+						possible_directions = append(possible_directions, +6)
+					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+						possible_directions = append(possible_directions, -6)
+					}
 				}
 
-				availableNeighbors := logic.AvailableNeighborCells(int(pos), game_state)
-
-				if len(availableNeighbors) > 0 {
-					chosenPos := availableNeighbors[rand.Intn(len(availableNeighbors))]
-					x1, y1 := logic.OneDtotwoD(int32(pos))
-					x2, y2 := logic.OneDtotwoD(int32(chosenPos))
-					fmt.Println("X1: ", x1)
-					fmt.Println("Y1: ", y1)
-					fmt.Println("X2: ", x2)
-					fmt.Println("Y2: ", y2)
-					bot.SubmitTurn(uint32(x1), uint32(y1), uint32(x2), uint32(y2))
-				} else {
-					fmt.Println("No available neighboring cells.")
-				}
+				x1, y1 := logic.OneDtotwoD(pos)
+				x2, y2 := logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
+				bot.SubmitTurn(x1, y1, x2, y2)
 			}
 
-			turn++
-			opponentWait = 0
-			time.Sleep(1 * time.Second)
-			break
-
+			// TODOEND
+			opponent_wait = 0
 		case 1:
-			if opponentWait == 0 {
+			if opponent_wait == 0 {
 				fmt.Println("Wait for opponent to make a move!")
-				opponentWait = 1
+				fmt.Println(bot.GetGameStateArray())
+				opponent_wait = 1
 			}
-			break
 		case 3:
 			fmt.Println("MATCH OVER! We won!")
 			return nil
-
 		case 4:
 			fmt.Println("We lost, but keep your chin up!")
 			return nil
-
 		case 5:
 			fmt.Println("Draw!")
 			return nil
-
 		case 6:
 			fmt.Println("Match not started!")
-
 		case 7:
 			fmt.Println("Match aborted! Disconnecting...")
 			time.Sleep(1 * time.Second)
 			return nil
-
 		default:
 			fmt.Println("Unknown Code!")
 			return nil
 		}
-
-		if opponentWait < 2 {
-			fmt.Println("==================")
-			game_array := bot.GetGameStateArray()
-			for i := 0; i < len(game_array); i++ {
-				fmt.Print(game_array[i], " ")
-				if (i+1)%5 == 0 {
-					fmt.Println()
-				}
-			}
-			opponentWait = 2
-		}
-
-		time.Sleep(250 * time.Millisecond)
+		time.Sleep(5 * time.Second)
 	}
 }
 
