@@ -126,7 +126,7 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 	fmt.Println(response)
 }
 
-func (bot *Bot) AutoPlay() error {
+func (bot *Bot) AutoPlay() {
 	bot.NewMatch()
 	time.Sleep(3 * time.Second)
 	fmt.Println("Joining match...")
@@ -157,5 +157,4 @@ func (bot *Bot) AutoPlay() error {
 		time.Sleep(5 * time.Second)
 	}
 
-	return nil
 }
