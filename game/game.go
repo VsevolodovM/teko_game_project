@@ -149,10 +149,15 @@ func (bot *Bot) AutoPlay() {
 		case 5:
 			fmt.Println("Draw!")
 			break
+		case 6:
+			fmt.Println("Match not started!")
 		case 7:
+			fmt.Println("Match aborted! Disconnecting...")
+			time.Sleep(1 * time.Second)
 			break
 		default:
 			fmt.Println("Unknown Code!")
+			break
 		}
 		time.Sleep(5 * time.Second)
 	}
