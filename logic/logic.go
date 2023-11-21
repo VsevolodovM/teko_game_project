@@ -1,13 +1,13 @@
-package test
+package logic
 
 import (
 	"math/rand"
 )
 
-func ChooseRandomPlace(arr []int32) int32 {
+func ChooseRandomPlace(arr []int32, num int32) int32 {
 	var empty_places []int32
 	for i := range arr {
-		if arr[i] == 0 {
+		if arr[i] == num {
 			empty_places = append(empty_places, int32(i))
 		}
 	}

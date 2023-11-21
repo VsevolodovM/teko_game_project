@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
+	"teko_game/logic"
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
 	"time"
@@ -20,6 +22,7 @@ type Bot struct {
 	Client            netcode.GameComClient
 	MatchIDPacket     netcode.MatchIDPacket
 	AuthPacket        netcode.AuthPacket
+	BeginningPlayer   bool
 }
 
 func NewBot(userToken string, Channel *grpc.ClientConn) *Bot {
@@ -55,6 +58,7 @@ func (bot *Bot) NewMatch() {
 	fmt.Println("First Player?:", response.BeginningPlayer)
 	bot.MatchToken = response.MatchToken
 	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: bot.MatchToken}
+	bot.BeginningPlayer = response.BeginningPlayer
 }
 
 func (bot *Bot) ShowElo() {
@@ -137,15 +141,67 @@ func (bot *Bot) AutoPlay() error {
 	bot.NewMatch()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
-
+	turn := 0
 	opponent_wait := 0
+	var pos int32
+	var x1, y1, x2, y2 uint32
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
 		switch codeFromServer {
 		case 0:
 			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
-			bot.SubmitTurn(1, 2, 3, 4)
+			var possible_directions []int32
+			game_state := bot.GetGameStateArray()
+			if turn < 4 {
+				x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
+				bot.SubmitTurn(0, 0, uint32(x), uint32(y))
+			} else {
+				if bot.BeginningPlayer == true {
+					pos = logic.ChooseRandomPlace(game_state, 1)
+					if pos+1 <= 24 && game_state[pos+1] == 0 {
+						possible_directions = append(possible_directions, 1)
+					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+						possible_directions = append(possible_directions, -1)
+					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+						possible_directions = append(possible_directions, 5)
+					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+						possible_directions = append(possible_directions, -5)
+					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+						possible_directions = append(possible_directions, 4)
+					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+						possible_directions = append(possible_directions, -4)
+					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+						possible_directions = append(possible_directions, +6)
+					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+						possible_directions = append(possible_directions, -6)
+					}
+
+				} else if bot.BeginningPlayer != true {
+					pos = logic.ChooseRandomPlace(game_state, 2)
+					if pos+1 <= 24 && game_state[pos+1] == 0 {
+						possible_directions = append(possible_directions, 1)
+					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+						possible_directions = append(possible_directions, -1)
+					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+						possible_directions = append(possible_directions, 5)
+					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+						possible_directions = append(possible_directions, -5)
+					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+						possible_directions = append(possible_directions, 4)
+					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+						possible_directions = append(possible_directions, -4)
+					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+						possible_directions = append(possible_directions, +6)
+					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+						possible_directions = append(possible_directions, -6)
+					}
+				}
+				x1, y1 = logic.OneDtotwoD(pos)
+				x2, y2 = logic.OneDtotwoD(possible_directions[rand.Intn(len(possible_directions))])
+				bot.SubmitTurn(x1, y1, x2, y2)
+			}
+
 			// TODOEND
 			opponent_wait = 0
 		case 1:
@@ -176,3 +232,7 @@ func (bot *Bot) AutoPlay() error {
 		time.Sleep(5 * time.Second)
 	}
 }
+
+// func (bot *Bot) GenerateTurn(game_state []uint32) (x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
+
+// }
