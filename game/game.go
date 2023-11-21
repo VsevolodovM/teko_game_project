@@ -69,7 +69,7 @@ func (bot *Bot) OpponentInfo() error {
 	return nil
 }
 
-func (bot *Bot) GetGameState() []int32 {
+func (bot *Bot) GetGameStateArray() []int32 {
 	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
 	if err != nil {
 		return nil
@@ -79,6 +79,15 @@ func (bot *Bot) GetGameState() []int32 {
 
 	fmt.Println("Array:", int32Values)
 	return int32Values
+}
+
+func (bot *Bot) GetGameStatusCode() netcode.GameStatus {
+	response, err := bot.Client.GetGameState(context.Background(), &bot.MatchIDPacket)
+	if err != nil {
+		log.Fatal(err)
+		return 7
+	}
+	return response.GameStatus
 }
 
 func (bot *Bot) AbortMatch() {
@@ -118,52 +127,35 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 }
 
 func (bot *Bot) AutoPlay() error {
-	// Finding match newMatch:
-	// - Waiting for the match to start. while response != OK
-
 	bot.NewMatch()
 	time.Sleep(3 * time.Second)
+	fmt.Println("Joining match...")
 
-	bot.GetGameState()
-	time.Sleep(3 * time.Second)
+	for {
+		codeFromServer := bot.GetGameStatusCode()
 
-	// err := bot.waitMatchStarted()
-	// if err != nil {
-	// 	return err
-	// }
-
-	// for {
-	// 	gameState, _, err := bot.getGameState()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	boardSize := len(gameState.Board)
-	// 	lastIndex := uint32(boardSize - 1)
-
-	// 	if rand.Intn(2) == 0 {
-	// 		err := bot.submitTurn(lastIndex, lastIndex, lastIndex, lastIndex)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	} else {
-	// 		x1 := uint32(rand.Intn(boardSize))
-	// 		y1 := uint32(rand.Intn(boardSize))
-	// 		x2 := uint32(rand.Intn(boardSize))
-	// 		y2 := uint32(rand.Intn(boardSize))
-
-	// 		err := bot.submitTurn(x1, y1, x2, y2)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	}
-
-	// 	time.Sleep(2 * time.Second)
-
-	// 	if gameState.GameOver {
-	// 		break
-	// 	}
-	// }
+		switch codeFromServer {
+		case 0:
+			bot.SubmitTurn(1, 2, 3, 4)
+		case 1:
+			fmt.Println("Wait for opponent to make a move!")
+			fmt.Println(bot.GetGameStateArray())
+		case 3:
+			fmt.Println("MATCH OVER! We won!")
+			break
+		case 4:
+			fmt.Println("We lost, but keep your chin up!")
+			break
+		case 5:
+			fmt.Println("Draw!")
+			break
+		case 7:
+			break
+		default:
+			fmt.Println("Unknown Code!")
+		}
+		time.Sleep(5 * time.Second)
+	}
 
 	return nil
 }
