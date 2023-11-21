@@ -133,7 +133,7 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 	fmt.Println(response)
 }
 
-func (bot *Bot) AutoPlay() {
+func (bot *Bot) AutoPlay() error {
 	bot.NewMatch()
 	time.Sleep(3 * time.Second)
 	fmt.Println("Joining match...")
@@ -161,12 +161,12 @@ func (bot *Bot) AutoPlay() {
 		case 7:
 			fmt.Println("Match aborted! Disconnecting...")
 			time.Sleep(1 * time.Second)
-			break
+			return nil
 		default:
 			fmt.Println("Unknown Code!")
+
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
-
 }
