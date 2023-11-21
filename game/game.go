@@ -144,8 +144,9 @@ func (bot *Bot) AutoPlay() error {
 
 		switch codeFromServer {
 		case 0:
-			// TODO: 米莎，这里还有工作要做 (+15 或 -100 学分)
+			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
 			bot.SubmitTurn(1, 2, 3, 4)
+			// TODOEND
 			opponent_wait = 0
 		case 1:
 			if opponent_wait == 0 {
