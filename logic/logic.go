@@ -58,3 +58,7 @@ func AvailableNeighborCells(position int, gameState []int32) []int {
 
 	return neighbors
 }
+
+func isElementZero(arr []int, index int) bool {
+	return arr[index] == 0
+}

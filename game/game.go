@@ -127,19 +127,18 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 		GameTurn: &game_turn,
 	}
 
-	response, err := bot.Client.SubmitTurn(context.Background(), &request)
+	_, err := bot.Client.SubmitTurn(context.Background(), &request)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(response)
 }
 
 func (bot *Bot) AutoPlay() error {
 	bot.NewMatch()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
+	fmt.Println("We are playing against: ", bot.OpponentInfo())
 	turn := 0
 	opponentWait := 0
 
@@ -152,19 +151,29 @@ func (bot *Bot) AutoPlay() error {
 			game_state := bot.GetGameStateArray()
 
 			if turn < 4 {
+				var x, y uint32
+
 				switch turn {
 				case 0:
-					pos = 4
+					pos = 11
+					break
 				case 1:
-					pos = 9
+					pos = 15
+					break
 				case 2:
-					pos = 14
+					pos = 17
+					break
 				case 3:
-					pos = 19
+					pos = 21
+					break
 				}
-
-				x1, y1 := logic.OneDtotwoD(pos)
-				bot.SubmitTurn(uint32(x1), uint32(y1), uint32(x1), uint32(y1))
+				if game_state[pos] != 0 {
+					randomPos := logic.ChooseRandomPlace(game_state, 0)
+					x, y = logic.OneDtotwoD(randomPos)
+				} else {
+					x, y = logic.OneDtotwoD(int32(pos))
+				}
+				bot.SubmitTurn(0, 0, x, y)
 			} else {
 				if bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 1)
@@ -190,13 +199,15 @@ func (bot *Bot) AutoPlay() error {
 
 			turn++
 			opponentWait = 0
+			time.Sleep(1 * time.Second)
+			break
 
 		case 1:
 			if opponentWait == 0 {
 				fmt.Println("Wait for opponent to make a move!")
 				opponentWait = 1
 			}
-
+			break
 		case 3:
 			fmt.Println("MATCH OVER! We won!")
 			return nil
@@ -222,16 +233,19 @@ func (bot *Bot) AutoPlay() error {
 			return nil
 		}
 
-		fmt.Println("==================")
-		game_array := bot.GetGameStateArray()
-		for i := 0; i < len(game_array); i++ {
-			fmt.Print(game_array[i], " ")
-			if (i+1)%5 == 0 {
-				fmt.Println()
+		if opponentWait < 2 {
+			fmt.Println("==================")
+			game_array := bot.GetGameStateArray()
+			for i := 0; i < len(game_array); i++ {
+				fmt.Print(game_array[i], " ")
+				if (i+1)%5 == 0 {
+					fmt.Println()
+				}
 			}
+			opponentWait = 2
 		}
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(300 * time.Millisecond)
 	}
 }
 
