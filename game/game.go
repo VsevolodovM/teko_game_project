@@ -13,7 +13,6 @@ import (
 
 type Bot struct {
 	MatchToken        string
-	Elo               int
 	UserToken         string
 	Wins              int
 	Loses             int
@@ -56,6 +55,14 @@ func (bot *Bot) NewMatch() {
 	fmt.Println("First Player?:", response.BeginningPlayer)
 	bot.MatchToken = response.MatchToken
 	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: bot.MatchToken}
+}
+
+func (bot *Bot) ShowElo() {
+	response, err := bot.Client.GetElo(context.Background(), &netcode.IDPacket{UserToken: bot.UserToken})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(response.GroupElo)
 }
 
 func (bot *Bot) OpponentInfo() error {
