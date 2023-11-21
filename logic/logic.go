@@ -15,9 +15,9 @@ func ChooseRandomPlace(arr []int32, num int32) int32 {
 	return empty_places[rand_index]
 }
 
-func OneDtotwoD(i int32) (int32, int32) {
+func OneDtotwoD(i int32) (uint32, uint32) {
 	y := i / 5
 	x := i - 5*y
 
-	return x, y
+	return uint32(x), uint32(y)
 }

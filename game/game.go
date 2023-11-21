@@ -144,7 +144,6 @@ func (bot *Bot) AutoPlay() error {
 	turn := 0
 	opponent_wait := 0
 	var pos int32
-	var x1, y1, x2, y2 uint32
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
@@ -157,7 +156,7 @@ func (bot *Bot) AutoPlay() error {
 				x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
 				bot.SubmitTurn(0, 0, uint32(x), uint32(y))
 			} else {
-				if bot.BeginningPlayer == true {
+				if bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 1)
 					if pos+1 <= 24 && game_state[pos+1] == 0 {
 						possible_directions = append(possible_directions, 1)
@@ -177,7 +176,7 @@ func (bot *Bot) AutoPlay() error {
 						possible_directions = append(possible_directions, -6)
 					}
 
-				} else if bot.BeginningPlayer != true {
+				} else if !bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 2)
 					if pos+1 <= 24 && game_state[pos+1] == 0 {
 						possible_directions = append(possible_directions, 1)
@@ -197,8 +196,9 @@ func (bot *Bot) AutoPlay() error {
 						possible_directions = append(possible_directions, -6)
 					}
 				}
-				x1, y1 = logic.OneDtotwoD(pos + 0)
-				x2, y2 = logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
+
+				x1, y1 := logic.OneDtotwoD(pos)
+				x2, y2 := logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
 				bot.SubmitTurn(x1, y1, x2, y2)
 			}
 
