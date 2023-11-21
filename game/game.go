@@ -135,9 +135,10 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 
 func (bot *Bot) AutoPlay() error {
 	bot.NewMatch()
+	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
-	fmt.Println("Joining match...")
 
+	opponent_wait := 0
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
@@ -145,9 +146,13 @@ func (bot *Bot) AutoPlay() error {
 		case 0:
 			// TODO: 米莎，这里还有工作要做 (+15 或 -100 学分)
 			bot.SubmitTurn(1, 2, 3, 4)
+			opponent_wait = 0
 		case 1:
-			fmt.Println("Wait for opponent to make a move!")
-			fmt.Println(bot.GetGameStateArray())
+			if opponent_wait == 0 {
+				fmt.Println("Wait for opponent to make a move!")
+				fmt.Println(bot.GetGameStateArray())
+				opponent_wait = 1
+			}
 		case 3:
 			fmt.Println("MATCH OVER! We won!")
 			return nil
