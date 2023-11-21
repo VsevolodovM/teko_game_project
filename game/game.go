@@ -152,21 +152,19 @@ func (bot *Bot) AutoPlay() error {
 			game_state := bot.GetGameStateArray()
 
 			if turn < 4 {
-				// Prioritize winning combinations for first four moves
-				winningPos := logic.GetWinningPosition(game_state)
-				if winningPos != -1 {
-					pos = int32(winningPos)
-				} else {
-					pos = logic.ChooseRandomPlace(game_state, 0)
+				switch turn {
+				case 0:
+					pos = 4
+				case 1:
+					pos = 9
+				case 2:
+					pos = 14
+				case 3:
+					pos = 19
 				}
 
-				availableNeighbors := logic.AvailableNeighborCells(int(pos), game_state)
-				if len(availableNeighbors) > 0 {
-					chosenPos := availableNeighbors[0] // Choose the first available cell for simplicity
-					x1, y1 := logic.OneDtotwoD(pos)
-					x2, y2 := logic.OneDtotwoD(int32(chosenPos))
-					bot.SubmitTurn(uint32(x1), uint32(y1), uint32(x2), uint32(y2))
-				}
+				x1, y1 := logic.OneDtotwoD(pos)
+				bot.SubmitTurn(uint32(x1), uint32(y1), uint32(x1), uint32(y1))
 			} else {
 				if bot.BeginningPlayer {
 					pos = logic.ChooseRandomPlace(game_state, 1)
@@ -224,6 +222,7 @@ func (bot *Bot) AutoPlay() error {
 			return nil
 		}
 
+		fmt.Println("==================")
 		game_array := bot.GetGameStateArray()
 		for i := 0; i < len(game_array); i++ {
 			fmt.Print(game_array[i], " ")
@@ -232,7 +231,7 @@ func (bot *Bot) AutoPlay() error {
 			}
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 

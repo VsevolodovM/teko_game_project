@@ -40,29 +40,3 @@ func AvailableNeighborCells(position int, gameState []int32) []int {
 
 	return neighbors
 }
-
-func GetWinningPosition(gameState []int32) int {
-	for i := 0; i < len(gameState); i += 5 {
-		row := gameState[i : i+5]
-		if checkRowForWin(row) {
-			for j := 0; j < len(row); j++ {
-				if row[j] == 0 {
-					return i + j
-				}
-			}
-		}
-	}
-
-	return -1
-}
-
-func checkRowForWin(row []int32) bool {
-	if row[0] == row[1] && row[1] == row[2] && row[0] != 0 {
-		return true
-	} else if row[1] == row[2] && row[2] == row[3] && row[1] != 0 {
-		return true
-	} else if row[2] == row[3] && row[3] == row[4] && row[2] != 0 {
-		return true
-	}
-	return false
-}
