@@ -197,8 +197,8 @@ func (bot *Bot) AutoPlay() error {
 						possible_directions = append(possible_directions, -6)
 					}
 				}
-				x1, y1 = logic.OneDtotwoD(pos)
-				x2, y2 = logic.OneDtotwoD(possible_directions[rand.Intn(len(possible_directions))])
+				x1, y1 = logic.OneDtotwoD(pos + 0)
+				x2, y2 = logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
 				bot.SubmitTurn(x1, y1, x2, y2)
 			}
 
