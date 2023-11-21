@@ -150,13 +150,13 @@ func (bot *Bot) AutoPlay() error {
 			fmt.Println(bot.GetGameStateArray())
 		case 3:
 			fmt.Println("MATCH OVER! We won!")
-			break
+			return nil
 		case 4:
 			fmt.Println("We lost, but keep your chin up!")
-			break
+			return nil
 		case 5:
 			fmt.Println("Draw!")
-			break
+			return nil
 		case 6:
 			fmt.Println("Match not started!")
 		case 7:
@@ -165,8 +165,7 @@ func (bot *Bot) AutoPlay() error {
 			return nil
 		default:
 			fmt.Println("Unknown Code!")
-
-			break
+			return nil
 		}
 		time.Sleep(5 * time.Second)
 	}
