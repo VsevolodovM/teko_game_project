@@ -25,24 +25,23 @@ func OneDtotwoD(i int32) (uint32, uint32) {
 func AvailableNeighborCells(position int, gameState []int32) []int {
 	neighbors := []int{}
 
-	// Check if the cell to the right is available
+	// cell to the right
 	if position%5 < 4 && gameState[position+1] == 0 {
 		neighbors = append(neighbors, position+1)
 	}
-	// Check if the cell to the left is available
+	// cell to the left
 	if position%5 > 0 && gameState[position-1] == 0 {
 		neighbors = append(neighbors, position-1)
 	}
-	// Check if the cell above is available
+	// cell above
 	if position >= 5 && gameState[position-5] == 0 {
 		neighbors = append(neighbors, position-5)
 	}
-	// Check if the cell below is available
+	// cell below
 	if position < 20 && gameState[position+5] == 0 {
 		neighbors = append(neighbors, position+5)
 	}
 
-	// Check diagonal neighbors
 	if position%5 < 4 && position >= 5 && gameState[position-4] == 0 {
 		neighbors = append(neighbors, position-4) // Upper right diagonal
 	}

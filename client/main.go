@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -23,10 +24,11 @@ func main() {
 	// secret := ""
 	bot := game.NewBot("5d7d39275cd5d64cb9c5f42ff45f5489b73a42ffb65bd0b8d3b3bcb3fed1d574", conn)
 
-	for {
+	for i := 1; i <= 10; i++ {
+		fmt.Printf("Executing AutoPlay() - Match %d\n", i)
 		bot.AutoPlay()
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 
 	// autpack := &netcode.AuthPacket{MatrNumber: "12344", Secret: "mgmmf"}

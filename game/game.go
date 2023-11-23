@@ -30,6 +30,7 @@ func NewBot(userToken string, Channel *grpc.ClientConn) *Bot {
 		UserToken:  userToken,
 		Client:     netcode.NewGameComClient(Channel),
 		AuthPacket: netcode.AuthPacket{MatrNumber: "11824691", Secret: "Iqzwersolonew15_"},
+		// MatchIDPacket: netcode.MatchIDPacket{UserToken: userToken, MatchToken: "tko#a0172d0942296d7c90ee1157336810c7c551a843e7885d57"},
 	}
 }
 
@@ -57,7 +58,7 @@ func (bot *Bot) NewMatch() {
 	fmt.Println("NewMatch:", response.MatchToken)
 	fmt.Println("First Player?:", response.BeginningPlayer)
 	bot.MatchToken = response.MatchToken
-	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: bot.MatchToken}
+	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: response.MatchToken}
 	bot.BeginningPlayer = response.BeginningPlayer
 }
 
@@ -245,7 +246,7 @@ func (bot *Bot) AutoPlay() error {
 			opponentWait = 2
 		}
 
-		time.Sleep(300 * time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 }
 
