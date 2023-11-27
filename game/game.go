@@ -30,7 +30,7 @@ func NewBot(userToken string, Channel *grpc.ClientConn) *Bot {
 		UserToken:  userToken,
 		Client:     netcode.NewGameComClient(Channel),
 		AuthPacket: netcode.AuthPacket{MatrNumber: "11824691", Secret: "Iqzwersolonew15_"},
-		// MatchIDPacket: netcode.MatchIDPacket{UserToken: userToken, MatchToken: "tko#a0172d0942296d7c90ee1157336810c7c551a843e7885d57"},
+		// MatchIDPacket: netcode.MatchIDPacket{UserToken: userToken, MatchToken: "tko#b5e2375e3baf105f9feae729e61bcd1a706df2e6ead44ba8"},
 	}
 }
 
@@ -140,7 +140,7 @@ func (bot *Bot) AutoPlay() error {
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
 	fmt.Println("We are playing against: ", bot.OpponentInfo())
-	turn := 0
+	turn := 0 // 4
 	opponentWait := 0
 
 	for {
