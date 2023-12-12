@@ -63,9 +63,11 @@ func (game *Teeko) IsGameOver() bool {
 	}
 
 	// Check squares (2x2) eto ne sdelano
-	for i := 0; i < 4; i++ {
-		if game.Board[i] == game.Board[i+1] && game.Board[i+1] == game.Board[i+5] && game.Board[i+5] == game.Board[i+6] && game.Board[i] != 0 {
-			return true
+	for i := 0; i < 19; i++ {
+		if i%5 != 4 {
+			if game.Board[i] == game.Board[i+1] && game.Board[i+1] == game.Board[i+5] && game.Board[i+5] == game.Board[i+6] && game.Board[i] != 0 {
+				return true
+			}
 		}
 	}
 
