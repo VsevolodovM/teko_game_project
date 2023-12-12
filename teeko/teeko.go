@@ -62,7 +62,7 @@ func (game *Teeko) IsGameOver() bool {
 		}
 	}
 
-	// Check squares (2x2) eto ne sdelano
+	// Check squares (2x2)
 	for i := 0; i < 19; i++ {
 		if i%5 != 4 {
 			if game.Board[i] == game.Board[i+1] && game.Board[i+1] == game.Board[i+5] && game.Board[i+5] == game.Board[i+6] && game.Board[i] != 0 {
@@ -71,6 +71,7 @@ func (game *Teeko) IsGameOver() bool {
 		}
 	}
 
+	// Check squares
 	for i := 0; i < 15; i++ {
 		if (i%5 != 4) && (i^5 != 0) {
 			if game.Board[i] == game.Board[i+4] && game.Board[i+4] == game.Board[i+6] && game.Board[i+6] == game.Board[i+10] && game.Board[i] != 0 {
@@ -79,6 +80,7 @@ func (game *Teeko) IsGameOver() bool {
 		}
 	}
 
+	// 2 times
 	if (game.Board[1] != 0 && game.Board[1] == 1 && game.Board[9] == 1 && game.Board[15] == 1 && game.Board[23] == 1) || (game.Board[1] != 0 && game.Board[1] == 2 && game.Board[9] == 2 && game.Board[15] == 2 && game.Board[23] == 2) {
 		return true
 	}
@@ -86,6 +88,7 @@ func (game *Teeko) IsGameOver() bool {
 		return true
 	}
 
+	// 1 time
 	if (game.Board[2] != 0 && game.Board[2] == 1 && game.Board[10] == 1 && game.Board[14] == 1 && game.Board[22] == 1) || (game.Board[2] != 0 && game.Board[2] == 2 && game.Board[10] == 2 && game.Board[14] == 2 && game.Board[22] == 2) {
 		return true
 	}
