@@ -1,17 +1,17 @@
 package main
 
+// "log"
+// "time"
+// "teko_game/game"
+// "teko_game/game"
+// "teko_game/pkg/tko"
+
 import (
 	"fmt"
-	//"log"
-	//"time"
-
-	//"teko_game/game"
-	//"teko_game/game"
-
-	//"teko_game/pkg/tko"
 	"teko_game/teeko"
-	//"google.golang.org/grpc"
 )
+
+//"google.golang.org/grpc"
 
 func main() {
 
@@ -34,7 +34,9 @@ func main() {
 
 	// c.SetGroupPseudonym(context.Background(), &netcode.SetPseudonymRequest{Auth: autpack, Pseudonym: "Máo Zédōng_Team"})
 	var a [25]int32
-	b := [4]uint32{0, 0, 1, 1}
+
+	b := teeko.Move{FromX: 0, FromY: 0, ToX: 1, ToY: 1}
 	teeko1 := teeko.NewTeeko(a, 1)
-	fmt.Print(teeko1.MakeMove(a, b, 1))
+	teeko1.MakeMove(b)
+	fmt.Print(teeko1.GeneratePossibleMoves())
 }
