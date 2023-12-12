@@ -21,8 +21,11 @@ func OneDtotwoD(i int32) (uint32, uint32) {
 
 	return uint32(x), uint32(y)
 }
+func TwoDtoOneD(x, y uint32) int32 {
+	return int32(y*5 + x)
+}
 
-func AvailableNeighborCells(position int, gameState []int32) []int {
+func AvailableNeighborCells(position int, gameState [25]int32) []int {
 	neighbors := []int{}
 
 	// cell to the right
