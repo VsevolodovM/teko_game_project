@@ -99,6 +99,28 @@ func (game *Teeko) IsGameOver() bool {
 		}
 	}
 
+	// 8 times (normal)
+	for i := 2; i < 4; i++ {
+		if game.Board[i] == game.Board[i+3] && game.Board[i+3] == game.Board[i+11] && game.Board[i+11] == game.Board[i+14] && game.Board[i] != 0 {
+			return true
+		}
+		next_row := i + 5
+		if game.Board[next_row] == game.Board[next_row+3] && game.Board[next_row+3] == game.Board[next_row+11] && game.Board[next_row+11] == game.Board[next_row+14] && game.Board[next_row] != 0 {
+			return true
+		}
+	}
+
+	// 8 times (mirrored)
+	for i := 1; i < 3; i++ {
+		if game.Board[i] == game.Board[i+7] && game.Board[i+7] == game.Board[i+9] && game.Board[i+9] == game.Board[i+16] && game.Board[i] != 0 {
+			return true
+		}
+		next_row := i + 5
+		if game.Board[next_row] == game.Board[next_row+7] && game.Board[next_row+7] == game.Board[next_row+9] && game.Board[next_row+9] == game.Board[next_row+16] && game.Board[next_row] != 0 {
+			return true
+		}
+	}
+
 	// 2 times
 	if (game.Board[1] != 0 && game.Board[1] == 1 && game.Board[9] == 1 && game.Board[15] == 1 && game.Board[23] == 1) || (game.Board[1] != 0 && game.Board[1] == 2 && game.Board[9] == 2 && game.Board[15] == 2 && game.Board[23] == 2) {
 		return true
