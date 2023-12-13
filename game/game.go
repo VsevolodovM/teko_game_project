@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
-	"teko_game/logic"
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
+	PVS "teko_game/principal_variation_search"
+	"teko_game/teeko"
 	"time"
 
 	"google.golang.org/grpc"
@@ -137,71 +137,85 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 }
 
 func (bot *Bot) AutoPlay() error {
+	var transpositionTable = make(map[uint64]PVS.TTEntry)
 	bot.NewMatch()
+	var player int32
+	if bot.BeginningPlayer == true {
+		player = 1
+	} else {
+		player = 2
+	}
+	teeko_game := teeko.NewTeeko([25]int32(bot.GetGameStateArray()), player)
+	teeko_game.InitZobristTable()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
-	turn := 0
 	opponent_wait := 0
-	var pos int32
+	//var pos int32
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
 		switch codeFromServer {
 		case 0:
 			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
-			var possible_directions []int32
-			game_state := bot.GetGameStateArray()
-			if turn < 4 {
-				x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
-				bot.SubmitTurn(0, 0, uint32(x), uint32(y))
-			} else {
-				if bot.BeginningPlayer {
-					pos = logic.ChooseRandomPlace(game_state, 1)
-					if pos+1 <= 24 && game_state[pos+1] == 0 {
-						possible_directions = append(possible_directions, 1)
-					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
-						possible_directions = append(possible_directions, -1)
-					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
-						possible_directions = append(possible_directions, 5)
-					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
-						possible_directions = append(possible_directions, -5)
-					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
-						possible_directions = append(possible_directions, 4)
-					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
-						possible_directions = append(possible_directions, -4)
-					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
-						possible_directions = append(possible_directions, +6)
-					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
-						possible_directions = append(possible_directions, -6)
-					}
+			// var possible_directions []int32
+			// game_state := bot.GetGameStateArray()
+			// if turn < 4 {
+			// 	x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
+			// 	bot.SubmitTurn(0, 0, uint32(x), uint32(y))
+			// } else {
+			// 	if bot.BeginningPlayer {
+			// 		pos = logic.ChooseRandomPlace(game_state, 1)
+			// 		if pos+1 <= 24 && game_state[pos+1] == 0 {
+			// 			possible_directions = append(possible_directions, 1)
+			// 		} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+			// 			possible_directions = append(possible_directions, -1)
+			// 		} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+			// 			possible_directions = append(possible_directions, 5)
+			// 		} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+			// 			possible_directions = append(possible_directions, -5)
+			// 		} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+			// 			possible_directions = append(possible_directions, 4)
+			// 		} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+			// 			possible_directions = append(possible_directions, -4)
+			// 		} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+			// 			possible_directions = append(possible_directions, +6)
+			// 		} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+			// 			possible_directions = append(possible_directions, -6)
+			// 		}
 
-				} else if !bot.BeginningPlayer {
-					pos = logic.ChooseRandomPlace(game_state, 2)
-					if pos+1 <= 24 && game_state[pos+1] == 0 {
-						possible_directions = append(possible_directions, 1)
-					} else if pos-1 >= 0 && game_state[pos-1] == 0 {
-						possible_directions = append(possible_directions, -1)
-					} else if pos+5 <= 24 && game_state[pos+5] == 0 {
-						possible_directions = append(possible_directions, 5)
-					} else if pos-5 >= 0 && game_state[pos-5] == 0 {
-						possible_directions = append(possible_directions, -5)
-					} else if pos+4 <= 24 && game_state[pos+4] == 0 {
-						possible_directions = append(possible_directions, 4)
-					} else if pos-4 >= 0 && game_state[pos-4] == 0 {
-						possible_directions = append(possible_directions, -4)
-					} else if pos+6 <= 24 && game_state[pos+6] == 0 {
-						possible_directions = append(possible_directions, +6)
-					} else if pos-6 >= 0 && game_state[pos-6] == 0 {
-						possible_directions = append(possible_directions, -6)
-					}
-				}
+			// 	} else if !bot.BeginningPlayer {
+			// 		pos = logic.ChooseRandomPlace(game_state, 2)
+			// 		if pos+1 <= 24 && game_state[pos+1] == 0 {
+			// 			possible_directions = append(possible_directions, 1)
+			// 		} else if pos-1 >= 0 && game_state[pos-1] == 0 {
+			// 			possible_directions = append(possible_directions, -1)
+			// 		} else if pos+5 <= 24 && game_state[pos+5] == 0 {
+			// 			possible_directions = append(possible_directions, 5)
+			// 		} else if pos-5 >= 0 && game_state[pos-5] == 0 {
+			// 			possible_directions = append(possible_directions, -5)
+			// 		} else if pos+4 <= 24 && game_state[pos+4] == 0 {
+			// 			possible_directions = append(possible_directions, 4)
+			// 		} else if pos-4 >= 0 && game_state[pos-4] == 0 {
+			// 			possible_directions = append(possible_directions, -4)
+			// 		} else if pos+6 <= 24 && game_state[pos+6] == 0 {
+			// 			possible_directions = append(possible_directions, +6)
+			// 		} else if pos-6 >= 0 && game_state[pos-6] == 0 {
+			// 			possible_directions = append(possible_directions, -6)
+			// 		}
+			// 	}
 
-				x1, y1 := logic.OneDtotwoD(pos)
-				x2, y2 := logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
-				bot.SubmitTurn(x1, y1, x2, y2)
-			}
+			// 	x1, y1 := logic.OneDtotwoD(pos)
+			// 	x2, y2 := logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
+			// 	bot.SubmitTurn(x1, y1, x2, y2)
+			// }
 
 			// TODOEND
+
+			teeko_game.Board = [25]int32(bot.GetGameStateArray())
+			teeko_game.ComputeHash()
+			move := PVS.BestMovePV(teeko_game, transpositionTable)
+			bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
+
 			opponent_wait = 0
 		case 1:
 			if opponent_wait == 0 {
@@ -213,7 +227,7 @@ func (bot *Bot) AutoPlay() error {
 			fmt.Println("MATCH OVER! We won!")
 			return nil
 		case 4:
-			fmt.Println("We lost, but keep your chin up!")
+			fmt.Println("Mission faild. We'll get 'em next time!")
 			return nil
 		case 5:
 			fmt.Println("Draw!")

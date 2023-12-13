@@ -34,7 +34,6 @@ func main() {
 
 	// c.SetGroupPseudonym(context.Background(), &netcode.SetPseudonymRequest{Auth: autpack, Pseudonym: "Máo Zédōng_Team"})
 	var a [25]int32
-
 	b := teeko.Move{FromX: 0, FromY: 0, ToX: 1, ToY: 1}
 	teeko1 := teeko.NewTeeko(a, 1)
 	teeko1.MakeMove(b)

@@ -5,7 +5,24 @@ import (
 	"teko_game/teeko"
 )
 
-func PrincipalVariationSearch(game teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool, transpositionTable *map[uint64]teeko.TTEntry) (float32, teeko.Move) {
+type TTEntry struct {
+	depth    int
+	score    float32
+	flag     int
+	bestMove teeko.Move
+}
+
+const (
+	Exact      = 0
+	LowerBound = 1
+	UpperBound = 2
+	Player1    = 1
+	Player2    = 2
+)
+
+func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool, transpositionTable map[uint64]TTEntry) (float32, teeko.Move) {
+	origAlpha := alpha
+
 	if depth == 0 || game.IsGameOver() {
 		return game.Evaluate(), teeko.Move{}
 	}
@@ -34,14 +51,14 @@ func PrincipalVariationSearch(game teeko.Teeko, depth int, alpha, beta float32, 
 
 		var score float32
 		if isFirstMove {
-			score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
+			score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer, transpositionTable)
 			isFirstMove = false
 		} else {
 			// Null window search
-			score, _ = PrincipalVariationSearch(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
+			score, _ = PrincipalVariationSearch(game, depth-1, -alpha-1, -alpha, !maximizingPlayer, transpositionTable)
 			if alpha < score && score < beta {
 				// Full re-search
-				score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
+				score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer, transpositionTable)
 			}
 		}
 
@@ -63,6 +80,15 @@ func PrincipalVariationSearch(game teeko.Teeko, depth int, alpha, beta float32, 
 			break
 		}
 	}
+	var flag int
+	if alpha <= origAlpha {
+		flag = UpperBound
+	} else if alpha >= beta {
+		flag = LowerBound
+	} else {
+		flag = Exact
+	}
+	transpositionTable[game.Hash] = TTEntry{depth, alpha, flag, bestMove}
 
 	if maximizingPlayer {
 		return alpha, bestMove
@@ -71,7 +97,7 @@ func PrincipalVariationSearch(game teeko.Teeko, depth int, alpha, beta float32, 
 	}
 }
 
-func BestMovePV(game teeko.Teeko) teeko.Move {
-	_, move := PrincipalVariationSearch(game, teeko.Empty, math.MinInt64, math.MaxInt64, game.CurrentPlayer == teeko.Player1)
+func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry) teeko.Move {
+	_, move := PrincipalVariationSearch(game, teeko.Empty, math.MinInt64, math.MaxInt64, game.CurrentPlayer == Player1, transpositionTable)
 	return move
 }
