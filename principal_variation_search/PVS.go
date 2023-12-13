@@ -98,6 +98,6 @@ func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha, beta float32,
 }
 
 func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry) teeko.Move {
-	_, move := PrincipalVariationSearch(game, teeko.Empty, math.MinInt64, math.MaxInt64, game.CurrentPlayer == Player1, transpositionTable)
+	_, move := PrincipalVariationSearch(game, teeko.MaxDepth, math.MinInt64, math.MaxInt64, game.CurrentPlayer == Player1, transpositionTable)
 	return move
 }

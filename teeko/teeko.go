@@ -8,7 +8,7 @@ import (
 const (
 	Exact    = 0
 	Empty    = 0
-	MaxDepth = 5
+	MaxDepth = 2
 )
 
 type Move struct {
@@ -31,8 +31,12 @@ func NewTeeko(board [25]int32, player int32) *Teeko {
 }
 
 func (game *Teeko) MakeMove(move Move) {
-	game.Board[(move.FromY*5 + move.FromX)] = 0
-	game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
+	if move.FromY != -1 || move.FromX != -1 {
+		game.Board[(move.FromY*5 + move.FromX)] = 0
+		game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
+	} else {
+		game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
+	}
 	game.ComputeHash()
 }
 
@@ -112,6 +116,9 @@ func (game *Teeko) IsGameOver() bool {
 }
 
 func (game *Teeko) Evaluate() float32 {
+	if game.IsGameOver() {
+		return 100
+	}
 	return float32(len(game.GeneratePossibleMoves()) - len(game.GeneratePossibleMovesOpponent()))
 }
 
@@ -209,4 +216,8 @@ func (game *Teeko) InitZobristTable() {
 			game.ZobristTable[i][j] = rand.Uint64()
 		}
 	}
+}
+
+func (game *Teeko) SwitchPlayer() {
+	game.CurrentPlayer = 3 - game.CurrentPlayer
 }
