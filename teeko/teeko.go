@@ -8,7 +8,7 @@ import (
 const (
 	Exact    = 0
 	Empty    = 0
-	MaxDepth = 2
+	MaxDepth = 7
 )
 
 type Move struct {
@@ -30,38 +30,68 @@ func NewTeeko(board [25]int32, player int32) *Teeko {
 	}
 }
 
+//	func (game *Teeko) MakeMove(move Move) {
+//		if move.FromY != -1 || move.FromX != -1 {
+//			game.Board[move.FromY*5+move.FromX] = 0
+//			game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
+//		} else {
+//			game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
+//		}
+//		game.CurrentPlayer = 3 - game.CurrentPlayer
+//		game.ComputeHash()
+//	}
 func (game *Teeko) MakeMove(move Move) {
-	if move.FromY != -1 || move.FromX != -1 {
-		game.Board[(move.FromY*5 + move.FromX)] = 0
+	// Check if it's a placement or a shift
+	if move.FromX == -1 && move.FromY == -1 {
+		// It's a new piece placement
 		game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
 	} else {
+		// It's moving an existing piece
+		game.Board[move.FromY*5+move.FromX] = Empty
 		game.Board[move.ToY*5+move.ToX] = game.CurrentPlayer
 	}
-	game.ComputeHash()
+
+	// Update other necessary game state information
+	// For example, switch players
+	game.CurrentPlayer = 3 - game.CurrentPlayer
 }
 
+// func (game *Teeko) UndoMove(move Move) {
+// 	// Reverse the move on the board
+// 	if move.FromX == -1 && move.FromY == -1 {
+// 		// If it was a new piece placement, just remove the piece
+// 		game.Board[move.ToY*5+move.ToX] = Empty
+// 	} else {
+// 		// If it was a move, swap back the pieces
+// 		game.Board[move.FromY*5+move.FromX] = game.CurrentPlayer
+// 		game.Board[move.ToY*5+move.ToX] = Empty
+// 	}
+
+// 	// Update the Zobrist hash
+// 	// For removing a piece
+// 	game.Hash ^= game.ZobristTable[move.ToY*5+move.ToX][game.CurrentPlayer]
+// 	if move.FromX != -1 && move.FromY != -1 {
+// 		// For putting back the original piece
+// 		game.Hash ^= game.ZobristTable[move.FromY*5+move.FromX][game.CurrentPlayer]
+// 	}
+
+//		// Switch the player back
+//		game.CurrentPlayer = 3 - game.CurrentPlayer // Assuming 1 and 2 are players
+//		game.ComputeHash()
+//	}
 func (game *Teeko) UndoMove(move Move) {
-	// Reverse the move on the board
+	// Revert the move
+	game.CurrentPlayer = 3 - game.CurrentPlayer
 	if move.FromX == -1 && move.FromY == -1 {
-		// If it was a new piece placement, just remove the piece
+		// Revert a new piece placement
 		game.Board[move.ToY*5+move.ToX] = Empty
 	} else {
-		// If it was a move, swap back the pieces
+		// Revert moving an existing piece
 		game.Board[move.FromY*5+move.FromX] = game.CurrentPlayer
 		game.Board[move.ToY*5+move.ToX] = Empty
 	}
 
-	// Update the Zobrist hash
-	// For removing a piece
-	game.Hash ^= game.ZobristTable[move.ToY*5+move.ToX][game.CurrentPlayer]
-	if move.FromX != -1 && move.FromY != -1 {
-		// For putting back the original piece
-		game.Hash ^= game.ZobristTable[move.FromY*5+move.FromX][game.CurrentPlayer]
-	}
-
-	// Switch the player back
-	game.CurrentPlayer = 3 - game.CurrentPlayer // Assuming 1 and 2 are players
-	game.ComputeHash()
+	// Revert other game state changes
 }
 
 func (game *Teeko) IsGameOver() bool {
@@ -141,7 +171,7 @@ func (game *Teeko) Evaluate() float32 {
 	if game.IsGameOver() {
 		return 100
 	}
-	return float32(len(game.GeneratePossibleMoves()) - len(game.GeneratePossibleMovesOpponent()))
+	return float32(len(game.GeneratePossibleMoves()))
 }
 
 func (game *Teeko) GeneratePossibleMoves() []Move {
@@ -163,6 +193,9 @@ func (game *Teeko) GeneratePossibleMoves() []Move {
 				if game.Board[y*5+x] == game.CurrentPlayer {
 					for dy := -1; dy <= 1; dy++ {
 						for dx := -1; dx <= 1; dx++ {
+							// if dy == 0 && dx == 0 {
+							// 	continue // Skip the current square
+							// }
 							newX, newY := x+dx, y+dy
 							if newX >= 0 && newX < 5 && newY >= 0 && newY < 5 && game.Board[newY*5+newX] == 0 {
 								moves = append(moves, Move{x, y, newX, newY})
@@ -240,6 +273,6 @@ func (game *Teeko) InitZobristTable() {
 	}
 }
 
-func (game *Teeko) SwitchPlayer() {
-	game.CurrentPlayer = 3 - game.CurrentPlayer
-}
+// func (game *Teeko) SwitchPlayer() {
+// 	game.CurrentPlayer = 3 - game.CurrentPlayer
+// }

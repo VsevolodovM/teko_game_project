@@ -9,11 +9,13 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
 	PVS "teko_game/principal_variation_search"
 	"teko_game/teeko"
+	"time"
 )
 
 //"google.golang.org/grpc"
@@ -41,7 +43,9 @@ func botMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
 	fmt.Print(moves)
 	if len(moves) > 0 {
 		game.ComputeHash()
-		move := PVS.BestMovePV(game, *tt)
+		//move := PVS.BestMovePV(game, *tt)
+		_, move := PVS.PVS(game, 3, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2)
+		//_, move := PVS.MiniMax(game, 5, game.CurrentPlayer == 2)
 		fmt.Print(move)
 		return move
 	}
@@ -95,26 +99,39 @@ func main() {
 	game.InitZobristTable()
 	game.ComputeHash()
 	reader := bufio.NewReader(os.Stdin)
-	Player1 := int32(1)
+
 	for !game.IsGameOver() {
 		for i := 0; i < 5; i++ {
 			fmt.Print(to2DArray(game.Board)[i])
 			fmt.Print("\n")
 		}
 		fmt.Print("\n")
-		if game.CurrentPlayer == Player1 {
+		if game.CurrentPlayer == 1 {
 			fmt.Println("Your turn. Enter your move as 'fromX fromY toX toY':")
+
 			input, _ := reader.ReadString('\n')
 			move := parseInput(input, game)
-			//move := teeko.Move{FromX: 0, FromY: 0, ToX: 1, ToY: 1}
+			//move := teeko.Move{FromX: 0, FromY: 0, ToX: 0, ToY: 0}
+			// for i := 0; i < 4; i++ {
+			// 	move = teeko.Move{FromX: 0, FromY: 0, ToX: i, ToY: i}
+			// 	break
+			// }
 			game.MakeMove(move)
+			//game.SwitchPlayer()
 		} else {
+			start := time.Now()
 			fmt.Println("Bot's turn...")
 			move := botMove(game, &transpositionTable)
 			game.MakeMove(move)
 			fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+			elapsed := time.Since(start)
+			fmt.Print("time: ", elapsed, "\n")
 		}
-		game.SwitchPlayer()
+
+	}
+	for i := 0; i < 5; i++ {
+		fmt.Print(to2DArray(game.Board)[i])
+		fmt.Print("\n")
 	}
 	fmt.Println("Game over!")
 
