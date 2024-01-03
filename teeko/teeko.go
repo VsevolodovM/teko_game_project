@@ -57,6 +57,7 @@ func (game *Teeko) MakeMove(move Move) {
 }
 
 // func (game *Teeko) UndoMove(move Move) {
+// 	game.CurrentPlayer = 3 - game.CurrentPlayer
 // 	// Reverse the move on the board
 // 	if move.FromX == -1 && move.FromY == -1 {
 // 		// If it was a new piece placement, just remove the piece
@@ -75,10 +76,10 @@ func (game *Teeko) MakeMove(move Move) {
 // 		game.Hash ^= game.ZobristTable[move.FromY*5+move.FromX][game.CurrentPlayer]
 // 	}
 
-//		// Switch the player back
-//		game.CurrentPlayer = 3 - game.CurrentPlayer // Assuming 1 and 2 are players
-//		game.ComputeHash()
-//	}
+// 	// Switch the player back
+// 	game.ComputeHash()
+// }
+
 func (game *Teeko) UndoMove(move Move) {
 	// Revert the move
 	game.CurrentPlayer = 3 - game.CurrentPlayer
@@ -91,7 +92,14 @@ func (game *Teeko) UndoMove(move Move) {
 		game.Board[move.ToY*5+move.ToX] = Empty
 	}
 
+	game.Hash ^= game.ZobristTable[move.ToY*5+move.ToX][game.CurrentPlayer]
+	if move.FromX != -1 && move.FromY != -1 {
+		// For putting back the original piece
+		game.Hash ^= game.ZobristTable[move.FromY*5+move.FromX][game.CurrentPlayer]
+	}
+
 	// Revert other game state changes
+	game.ComputeHash()
 }
 
 func (game *Teeko) IsGameOver() bool {

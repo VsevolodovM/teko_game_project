@@ -111,16 +111,31 @@ func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha, beta float32,
 	}
 }
 
-func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry) teeko.Move {
-	_, move := PrincipalVariationSearch(game, teeko.MaxDepth, math.MinInt64, math.MaxInt64, game.CurrentPlayer == Player2, transpositionTable)
+func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry, player int32) teeko.Move {
+	current_pl := player
+	_, move := PrincipalVariationSearch(game, teeko.MaxDepth, math.MinInt64, math.MaxInt64, game.CurrentPlayer == current_pl, transpositionTable)
 	return move
 }
 
-func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool) (float32, teeko.Move) {
+func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool, transpositionTable map[uint64]TTEntry) (float32, teeko.Move) {
 
 	if depth == 0 || game.IsGameOver() {
-		print(int(game.Evaluate()))
+		//print(int(game.Evaluate()))
 		return game.Evaluate(), teeko.Move{} // Assuming evaluate() returns the heuristic value
+	}
+
+	ttEntry, found := transpositionTable[game.Hash]
+	if found && ttEntry.depth >= depth {
+		if ttEntry.flag == Exact {
+			return ttEntry.score, ttEntry.bestMove
+		} else if ttEntry.flag == LowerBound && ttEntry.score > alpha {
+			alpha = ttEntry.score
+		} else if ttEntry.flag == UpperBound && ttEntry.score < beta {
+			beta = ttEntry.score
+		}
+		if alpha >= beta {
+			return ttEntry.score, ttEntry.bestMove
+		}
 	}
 
 	isPVNode := false
@@ -131,14 +146,14 @@ func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer boo
 		game.MakeMove(move)
 		var score float32
 		if isPVNode {
-			score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
+			score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer, transpositionTable)
 			score = -1 * score
 			if alpha < score && score < beta {
-				score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer)
+				score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer, transpositionTable)
 				score = -1 * score
 			}
 		} else {
-			score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer)
+			score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer, transpositionTable)
 			score = -1 * score
 		}
 
@@ -200,4 +215,62 @@ func MiniMax(game *teeko.Teeko, depth int, maximizingPlayer bool) (int, teeko.Mo
 
 		return minEval, bestMove
 	}
+}
+
+func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
+	if depth == 0 || game.IsGameOver() {
+		return int(game.Evaluate()), teeko.Move{} // Replace with your game's evaluation function
+	}
+
+	var bestMove teeko.Move
+	if maximizingPlayer {
+		maxEval := math.MinInt32
+		for _, move := range game.GeneratePossibleMoves() {
+			game.MakeMove(move)
+			eval, _ := MiniMaxAlphaBeta(game, depth-1, alpha, beta, false)
+			game.UndoMove(move)
+
+			if eval > maxEval {
+				maxEval = eval
+				bestMove = move
+			}
+			alpha = max(alpha, eval)
+			if beta <= alpha {
+				break // Beta cut-off
+			}
+		}
+		return maxEval, bestMove
+	} else {
+		minEval := math.MaxInt32
+		for _, move := range game.GeneratePossibleMoves() {
+			game.MakeMove(move)
+			eval, _ := MiniMaxAlphaBeta(game, depth-1, alpha, beta, true)
+			game.UndoMove(move)
+
+			if eval < minEval {
+				minEval = eval
+				bestMove = move
+			}
+			beta = min(beta, eval)
+			if beta <= alpha {
+				break // Alpha cut-off
+			}
+		}
+		return minEval, bestMove
+	}
+}
+
+// Helper functions for min and max
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

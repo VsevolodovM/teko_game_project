@@ -7,10 +7,12 @@ package main
 // "teko_game/pkg/tko"
 
 import (
-	"bufio"
+	//"bufio"
 	"fmt"
+
+	//"os"
+
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	PVS "teko_game/principal_variation_search"
@@ -36,16 +38,31 @@ func parseInput(input string, game *teeko.Teeko) teeko.Move {
 	return teeko.Move{FromX: fromX, FromY: fromY, ToX: toX, ToY: toY}
 }
 
-func botMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
+func botOneMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
 	// Implement the bot's strategy (e.g., using Principal Variation Search)
 	// For simplicity, this example just returns a random valid move
 	moves := game.GeneratePossibleMoves()
 	fmt.Print(moves)
 	if len(moves) > 0 {
 		game.ComputeHash()
-		//move := PVS.BestMovePV(game, *tt)
-		_, move := PVS.PVS(game, 3, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2)
-		//_, move := PVS.MiniMax(game, 5, game.CurrentPlayer == 2)
+		move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
+		//_, move := PVS.PVS(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 1, *tt)
+		//_, move := PVS.MiniMax(game, 5, game.CurrentPlayer == 1)
+		fmt.Print(move)
+		return move
+	}
+	return teeko.Move{FromX: -1, FromY: -1} // No valid moves
+}
+func botTwoMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
+	// Implement the bot's strategy (e.g., using Principal Variation Search)
+	// For simplicity, this example just returns a random valid move
+	moves := game.GeneratePossibleMoves()
+	fmt.Print(moves)
+	if len(moves) > 0 {
+		game.ComputeHash()
+		//move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
+		//_, move := PVS.PVS(game, 6, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2, *tt)
+		_, move := PVS.MiniMaxAlphaBeta(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2)
 		fmt.Print(move)
 		return move
 	}
@@ -96,9 +113,10 @@ func main() {
 	var a [25]int32
 	game := teeko.NewTeeko(a, 1)
 	var transpositionTable = make(map[uint64]PVS.TTEntry)
+	var transpositionTable2 = make(map[uint64]PVS.TTEntry)
 	game.InitZobristTable()
 	game.ComputeHash()
-	reader := bufio.NewReader(os.Stdin)
+	//reader := bufio.NewReader(os.Stdin)
 
 	for !game.IsGameOver() {
 		for i := 0; i < 5; i++ {
@@ -107,21 +125,25 @@ func main() {
 		}
 		fmt.Print("\n")
 		if game.CurrentPlayer == 1 {
-			fmt.Println("Your turn. Enter your move as 'fromX fromY toX toY':")
+			time.Sleep(2 * time.Second)
+			// fmt.Println("Your turn. Enter your move as 'fromX fromY toX toY':")
 
-			input, _ := reader.ReadString('\n')
-			move := parseInput(input, game)
-			//move := teeko.Move{FromX: 0, FromY: 0, ToX: 0, ToY: 0}
-			// for i := 0; i < 4; i++ {
-			// 	move = teeko.Move{FromX: 0, FromY: 0, ToX: i, ToY: i}
-			// 	break
-			// }
-			game.MakeMove(move)
-			//game.SwitchPlayer()
-		} else {
+			// input, _ := reader.ReadString('\n')
+			// move := parseInput(input, game)
+
+			// game.MakeMove(move)
 			start := time.Now()
-			fmt.Println("Bot's turn...")
-			move := botMove(game, &transpositionTable)
+			fmt.Println("Bot1's turn...")
+			move := botOneMove(game, &transpositionTable)
+			game.MakeMove(move)
+			fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+			elapsed := time.Since(start)
+			fmt.Print("time: ", elapsed, "\n")
+		} else {
+			time.Sleep(2 * time.Second)
+			start := time.Now()
+			fmt.Println("Bot2's turn...")
+			move := botTwoMove(game, &transpositionTable2)
 			game.MakeMove(move)
 			fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
 			elapsed := time.Since(start)
