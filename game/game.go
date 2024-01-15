@@ -90,7 +90,10 @@ func (bot *Bot) GetGameStateArray() []int32 {
 
 	int32Values := response.GetTkoGameState().GetBoard()
 
-	fmt.Println("Array:", int32Values)
+	for i := 0; i < 5; i++ {
+		fmt.Print(to2DArray([25]int32(int32Values))[i])
+		fmt.Print("\n")
+	}
 	return int32Values
 }
 
@@ -213,6 +216,7 @@ func (bot *Bot) AutoPlay() error {
 
 			teeko_game.Board = [25]int32(bot.GetGameStateArray())
 			_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
+			fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
 			bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
 
 			opponent_wait = 0
@@ -243,4 +247,16 @@ func (bot *Bot) AutoPlay() error {
 		}
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func to2DArray(oneDArray [25]int32) [5][5]int32 {
+	var twoDArray [5][5]int32
+
+	for i := 0; i < 25; i++ {
+		row := i / 5
+		col := i % 5
+		twoDArray[row][col] = oneDArray[i]
+	}
+
+	return twoDArray
 }

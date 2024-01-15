@@ -33,47 +33,37 @@ import (
 // 	return teeko.Move{FromX: fromX, FromY: fromY, ToX: toX, ToY: toY}
 // }
 
-// func botOneMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
-// 	// Implement the bot's strategy (e.g., using Principal Variation Search)
-// 	// For simplicity, this example just returns a random valid move
-// 	moves := game.GeneratePossibleMoves()
-// 	fmt.Print(moves)
-// 	if len(moves) > 0 {
-// 		game.ComputeHash()
-// 		move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
-// 		//_, move := PVS.PVS(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 1, *tt)
-// 		//_, move := PVS.MiniMax(game, 5, game.CurrentPlayer == 1)
-// 		fmt.Print(move)
-// 		return move
-// 	}
-// 	return teeko.Move{FromX: -1, FromY: -1} // No valid moves
-// }
-// func botTwoMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
-// 	// Implement the bot's strategy (e.g., using Principal Variation Search)
-// 	// For simplicity, this example just returns a random valid move
-// 	moves := game.GeneratePossibleMoves()
-// 	fmt.Print(moves)
-// 	if len(moves) > 0 {
-// 		//game.ComputeHash()
-// 		//move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
-// 		//_, move := PVS.PVS(game, 6, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2, *tt)
-// 		_, move := PVS.MiniMaxAlphaBeta(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2)
-// 		fmt.Print(move)
-// 		return move
-// 	}
-// 	return teeko.Move{FromX: -1, FromY: -1} // No valid moves
-// }
-// func to2DArray(oneDArray [25]int32) [5][5]int32 {
-// 	var twoDArray [5][5]int32
-
-// 	for i := 0; i < 25; i++ {
-// 		row := i / 5
-// 		col := i % 5
-// 		twoDArray[row][col] = oneDArray[i]
-// 	}
-
-// 	return twoDArray
-// }
+//	func botOneMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
+//		// Implement the bot's strategy (e.g., using Principal Variation Search)
+//		// For simplicity, this example just returns a random valid move
+//		moves := game.GeneratePossibleMoves()
+//		fmt.Print(moves)
+//		if len(moves) > 0 {
+//			game.ComputeHash()
+//			move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
+//			//_, move := PVS.PVS(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 1, *tt)
+//			//_, move := PVS.MiniMax(game, 5, game.CurrentPlayer == 1)
+//			fmt.Print(move)
+//			return move
+//		}
+//		return teeko.Move{FromX: -1, FromY: -1} // No valid moves
+//	}
+//
+//	func botTwoMove(game *teeko.Teeko, tt *map[uint64]PVS.TTEntry) teeko.Move {
+//		// Implement the bot's strategy (e.g., using Principal Variation Search)
+//		// For simplicity, this example just returns a random valid move
+//		moves := game.GeneratePossibleMoves()
+//		fmt.Print(moves)
+//		if len(moves) > 0 {
+//			//game.ComputeHash()
+//			//move := PVS.BestMovePV(game, *tt, game.CurrentPlayer)
+//			//_, move := PVS.PVS(game, 6, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2, *tt)
+//			_, move := PVS.MiniMaxAlphaBeta(game, 7, math.MinInt64, math.MaxInt64, game.CurrentPlayer == 2)
+//			fmt.Print(move)
+//			return move
+//		}
+//		return teeko.Move{FromX: -1, FromY: -1} // No valid moves
+//	}
 
 func main() {
 
@@ -82,8 +72,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	matr_number := ""
-	secret := ""
+	// matr_number := 11824691
+	// secret := ""
 	bot := game.NewBot("5d7d39275cd5d64cb9c5f42ff45f5489b73a42ffb65bd0b8d3b3bcb3fed1d574", conn)
 
 	for {
