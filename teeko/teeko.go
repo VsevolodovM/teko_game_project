@@ -8,7 +8,7 @@ import (
 const (
 	Exact    = 0
 	Empty    = 0
-	MaxDepth = 7
+	MaxDepth = 6
 )
 
 type Move struct {

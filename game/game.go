@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
 	PVS "teko_game/principal_variation_search"
@@ -137,7 +138,6 @@ func (bot *Bot) SubmitTurn(x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
 }
 
 func (bot *Bot) AutoPlay() error {
-	var transpositionTable = make(map[uint64]PVS.TTEntry)
 	bot.NewMatch()
 	var player int32
 	if bot.BeginningPlayer == true {
@@ -146,7 +146,7 @@ func (bot *Bot) AutoPlay() error {
 		player = 2
 	}
 	teeko_game := teeko.NewTeeko([25]int32(bot.GetGameStateArray()), player)
-	teeko_game.InitZobristTable()
+	//teeko_game.InitZobristTable()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
 	opponent_wait := 0
@@ -212,8 +212,7 @@ func (bot *Bot) AutoPlay() error {
 			// TODOEND
 
 			teeko_game.Board = [25]int32(bot.GetGameStateArray())
-			teeko_game.ComputeHash()
-			move := PVS.BestMovePV(teeko_game, transpositionTable)
+			_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
 			bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
 
 			opponent_wait = 0
@@ -245,7 +244,3 @@ func (bot *Bot) AutoPlay() error {
 		time.Sleep(5 * time.Second)
 	}
 }
-
-// func (bot *Bot) GenerateTurn(game_state []uint32) (x1 uint32, y1 uint32, x2 uint32, y2 uint32) {
-
-// }

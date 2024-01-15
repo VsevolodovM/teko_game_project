@@ -117,25 +117,11 @@ func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry, player
 	return move
 }
 
-func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool, transpositionTable map[uint64]TTEntry) (float32, teeko.Move) {
+func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool) (float32, teeko.Move) {
 
 	if depth == 0 || game.IsGameOver() {
 		//print(int(game.Evaluate()))
 		return game.Evaluate(), teeko.Move{} // Assuming evaluate() returns the heuristic value
-	}
-
-	ttEntry, found := transpositionTable[game.Hash]
-	if found && ttEntry.depth >= depth {
-		if ttEntry.flag == Exact {
-			return ttEntry.score, ttEntry.bestMove
-		} else if ttEntry.flag == LowerBound && ttEntry.score > alpha {
-			alpha = ttEntry.score
-		} else if ttEntry.flag == UpperBound && ttEntry.score < beta {
-			beta = ttEntry.score
-		}
-		if alpha >= beta {
-			return ttEntry.score, ttEntry.bestMove
-		}
 	}
 
 	isPVNode := false
@@ -146,14 +132,14 @@ func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer boo
 		game.MakeMove(move)
 		var score float32
 		if isPVNode {
-			score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer, transpositionTable)
+			score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
 			score = -1 * score
 			if alpha < score && score < beta {
-				score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer, transpositionTable)
+				score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer)
 				score = -1 * score
 			}
 		} else {
-			score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer, transpositionTable)
+			score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer)
 			score = -1 * score
 		}
 
