@@ -14,6 +14,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	Reset   = "\033[0m"
+	Red     = "\033[31m"
+	Green   = "\033[32m"
+	Magenta = "\033[35m"
+)
+
 type Bot struct {
 	MatchToken        string
 	UserToken         string
@@ -149,91 +156,48 @@ func (bot *Bot) AutoPlay() error {
 		player = 2
 	}
 	teeko_game := teeko.NewTeeko([25]int32(bot.GetGameStateArray()), player)
-	//teeko_game.InitZobristTable()
+	// teeko_game.InitZobristTable()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
 	opponent_wait := 0
-	//var pos int32
+	turn := 0
+	// var pos int32
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
 		switch codeFromServer {
 		case 0:
 			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
-			// var possible_directions []int32
 			// game_state := bot.GetGameStateArray()
-			// if turn < 4 {
-			// 	x, y := logic.OneDtotwoD(logic.ChooseRandomPlace(game_state, 0))
-			// 	bot.SubmitTurn(0, 0, uint32(x), uint32(y))
-			// } else {
-			// 	if bot.BeginningPlayer {
-			// 		pos = logic.ChooseRandomPlace(game_state, 1)
-			// 		if pos+1 <= 24 && game_state[pos+1] == 0 {
-			// 			possible_directions = append(possible_directions, 1)
-			// 		} else if pos-1 >= 0 && game_state[pos-1] == 0 {
-			// 			possible_directions = append(possible_directions, -1)
-			// 		} else if pos+5 <= 24 && game_state[pos+5] == 0 {
-			// 			possible_directions = append(possible_directions, 5)
-			// 		} else if pos-5 >= 0 && game_state[pos-5] == 0 {
-			// 			possible_directions = append(possible_directions, -5)
-			// 		} else if pos+4 <= 24 && game_state[pos+4] == 0 {
-			// 			possible_directions = append(possible_directions, 4)
-			// 		} else if pos-4 >= 0 && game_state[pos-4] == 0 {
-			// 			possible_directions = append(possible_directions, -4)
-			// 		} else if pos+6 <= 24 && game_state[pos+6] == 0 {
-			// 			possible_directions = append(possible_directions, +6)
-			// 		} else if pos-6 >= 0 && game_state[pos-6] == 0 {
-			// 			possible_directions = append(possible_directions, -6)
-			// 		}
-
-			// 	} else if !bot.BeginningPlayer {
-			// 		pos = logic.ChooseRandomPlace(game_state, 2)
-			// 		if pos+1 <= 24 && game_state[pos+1] == 0 {
-			// 			possible_directions = append(possible_directions, 1)
-			// 		} else if pos-1 >= 0 && game_state[pos-1] == 0 {
-			// 			possible_directions = append(possible_directions, -1)
-			// 		} else if pos+5 <= 24 && game_state[pos+5] == 0 {
-			// 			possible_directions = append(possible_directions, 5)
-			// 		} else if pos-5 >= 0 && game_state[pos-5] == 0 {
-			// 			possible_directions = append(possible_directions, -5)
-			// 		} else if pos+4 <= 24 && game_state[pos+4] == 0 {
-			// 			possible_directions = append(possible_directions, 4)
-			// 		} else if pos-4 >= 0 && game_state[pos-4] == 0 {
-			// 			possible_directions = append(possible_directions, -4)
-			// 		} else if pos+6 <= 24 && game_state[pos+6] == 0 {
-			// 			possible_directions = append(possible_directions, +6)
-			// 		} else if pos-6 >= 0 && game_state[pos-6] == 0 {
-			// 			possible_directions = append(possible_directions, -6)
-			// 		}
-			// 	}
-
-			// 	x1, y1 := logic.OneDtotwoD(pos)
-			// 	x2, y2 := logic.OneDtotwoD(pos + possible_directions[rand.Intn(len(possible_directions))])
-			// 	bot.SubmitTurn(x1, y1, x2, y2)
-			// }
-
+			if turn < 4 {
+				teeko_game.Board = [25]int32(bot.GetGameStateArray())
+				_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
+				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+				bot.SubmitTurn(0, 0, uint32(move.ToX), uint32(move.ToY))
+			} else {
+				teeko_game.Board = [25]int32(bot.GetGameStateArray())
+				_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
+				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+				bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
+			}
 			// TODOEND
-
-			teeko_game.Board = [25]int32(bot.GetGameStateArray())
-			_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
-			fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
-			bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
+			turn++
 
 			opponent_wait = 0
 		case 1:
 			if opponent_wait == 0 {
 				fmt.Println("Wait for opponent to make a move!")
-				fmt.Println(bot.GetGameStateArray())
+				// fmt.Println(bot.GetGameStateArray())
 				opponent_wait = 1
 			}
 		case 3:
-			fmt.Println("MATCH OVER! We won!")
+			fmt.Println(Green + "MATCH OVER! We won!" + Reset)
 			return nil
 		case 4:
-			fmt.Println("Mission faild. We'll get 'em next time!")
+			fmt.Println(Red + "Mission faild. We'll get 'em next time!" + Reset)
 			return nil
 		case 5:
-			fmt.Println("Draw!")
+			fmt.Println(Magenta + "Draw!" + Reset)
 			return nil
 		case 6:
 			fmt.Println("Match not started!")

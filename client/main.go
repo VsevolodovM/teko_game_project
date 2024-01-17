@@ -76,9 +76,15 @@ func main() {
 	// secret := ""
 	bot := game.NewBot("5d7d39275cd5d64cb9c5f42ff45f5489b73a42ffb65bd0b8d3b3bcb3fed1d574", conn)
 
-	for {
+	// for {
+	// 	bot.AutoPlay()
+
+	// 	time.Sleep(5 * time.Second)
+	// }
+	for i := 0; i < 20; i++ {
 		bot.AutoPlay()
 
+		// Sleep for 5 seconds before the next iteration
 		time.Sleep(5 * time.Second)
 	}
 }
