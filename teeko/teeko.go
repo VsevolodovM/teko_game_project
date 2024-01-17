@@ -166,11 +166,38 @@ func (game *Teeko) IsGameOver() bool {
 	return false
 }
 
-func (game *Teeko) Evaluate() float32 {
+// func (game *Teeko) Evaluate() float32 {
+// 	if game.IsGameOver() {
+// 		return 100
+// 	}
+// 	return float32(len(game.GeneratePossibleMoves()))
+// }
+
+func (game *Teeko) Evaluate(player int32) int {
 	if game.IsGameOver() {
 		return 100
 	}
-	return float32(len(game.GeneratePossibleMoves()))
+	count_one := 0
+	count_two := 0
+	board_values := [25]int{0, 0, 2, 0, 0, 0, 10, 5, 10, 0, 2, 5, 5, 5, 2, 0, 10, 5, 10, 0, 0, 0, 2, 0, 0}
+
+	for i := 0; i < 25; i++ {
+		if game.Board[i] == 1 {
+			count_one += board_values[i]
+		}
+		if game.Board[i] == 2 {
+			count_two += 0
+		}
+
+	}
+	if player == 1 {
+		return count_one - count_two
+	}
+	if player == 2 {
+		return count_two - count_one
+	}
+
+	return 1
 }
 
 func (game *Teeko) GeneratePossibleMoves() []Move {
