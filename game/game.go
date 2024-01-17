@@ -171,12 +171,12 @@ func (bot *Bot) AutoPlay() error {
 			// game_state := bot.GetGameStateArray()
 			if turn < 4 {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
+				_, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
 				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(0, 0, uint32(move.ToX), uint32(move.ToY))
 			} else {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				_, move := PVS.PVS(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
+				_, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
 				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
 			}

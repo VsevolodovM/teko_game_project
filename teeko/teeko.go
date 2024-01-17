@@ -91,15 +91,6 @@ func (game *Teeko) UndoMove(move Move) {
 		game.Board[move.FromY*5+move.FromX] = game.CurrentPlayer
 		game.Board[move.ToY*5+move.ToX] = Empty
 	}
-
-	game.Hash ^= game.ZobristTable[move.ToY*5+move.ToX][game.CurrentPlayer]
-	if move.FromX != -1 && move.FromY != -1 {
-		// For putting back the original piece
-		game.Hash ^= game.ZobristTable[move.FromY*5+move.FromX][game.CurrentPlayer]
-	}
-
-	// Revert other game state changes
-	game.ComputeHash()
 }
 
 func (game *Teeko) IsGameOver() bool {
@@ -190,7 +181,7 @@ func (game *Teeko) GeneratePossibleMoves() []Move {
 		for y := 0; y < 5; y++ {
 			for x := 0; x < 5; x++ {
 				if game.Board[y*5+x] == 0 { // Check if the cell is empty
-					moves = append(moves, Move{0, 0, x, y})
+					moves = append(moves, Move{-1, -1, x, y})
 				}
 			}
 		}
@@ -204,37 +195,6 @@ func (game *Teeko) GeneratePossibleMoves() []Move {
 							// if dy == 0 && dx == 0 {
 							// 	continue // Skip the current square
 							// }
-							newX, newY := x+dx, y+dy
-							if newX >= 0 && newX < 5 && newY >= 0 && newY < 5 && game.Board[newY*5+newX] == 0 {
-								moves = append(moves, Move{x, y, newX, newY})
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return moves
-}
-func (game *Teeko) GeneratePossibleMovesOpponent() []Move {
-	var moves []Move
-
-	// Generating moves for placing a new piece on the board
-	if game.IsInitialPhase() {
-		for y := 0; y < 5; y++ {
-			for x := 0; x < 5; x++ {
-				if game.Board[y*5+x] == 0 { // Check if the cell is empty
-					moves = append(moves, Move{0, 0, x, y})
-				}
-			}
-		}
-	} else {
-		// Generating moves for moving an existing piece
-		for y := 0; y < 5; y++ {
-			for x := 0; x < 5; x++ {
-				if game.Board[y*5+x] == 3-game.CurrentPlayer {
-					for dy := -1; dy <= 1; dy++ {
-						for dx := -1; dx <= 1; dx++ {
 							newX, newY := x+dx, y+dy
 							if newX >= 0 && newX < 5 && newY >= 0 && newY < 5 && game.Board[newY*5+newX] == 0 {
 								moves = append(moves, Move{x, y, newX, newY})
