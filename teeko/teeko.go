@@ -186,7 +186,7 @@ func (game *Teeko) Evaluate(player int32) int {
 			count_one += board_values[i]
 		}
 		if game.Board[i] == 2 {
-			count_two += 0
+			count_two += board_values[i]
 		}
 
 	}
@@ -197,7 +197,7 @@ func (game *Teeko) Evaluate(player int32) int {
 		return count_two - count_one
 	}
 
-	return 1
+	return 0
 }
 
 func (game *Teeko) GeneratePossibleMoves() []Move {
