@@ -190,7 +190,7 @@ func (game *Teeko) GeneratePossibleMoves() []Move {
 		for y := 0; y < 5; y++ {
 			for x := 0; x < 5; x++ {
 				if game.Board[y*5+x] == 0 { // Check if the cell is empty
-					moves = append(moves, Move{-1, -1, x, y})
+					moves = append(moves, Move{0, 0, x, y})
 				}
 			}
 		}
@@ -224,7 +224,7 @@ func (game *Teeko) GeneratePossibleMovesOpponent() []Move {
 		for y := 0; y < 5; y++ {
 			for x := 0; x < 5; x++ {
 				if game.Board[y*5+x] == 0 { // Check if the cell is empty
-					moves = append(moves, Move{-1, -1, x, y})
+					moves = append(moves, Move{0, 0, x, y})
 				}
 			}
 		}
