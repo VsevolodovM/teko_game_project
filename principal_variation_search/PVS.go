@@ -2,9 +2,21 @@ package PVS
 
 import (
 	"math"
-	"sort"
 	"teko_game/teeko"
 )
+
+// remove later
+func to2DArray(oneDArray [25]int32) [5][5]int32 {
+	var twoDArray [5][5]int32
+
+	for i := 0; i < 25; i++ {
+		row := i / 5
+		col := i % 5
+		twoDArray[row][col] = oneDArray[i]
+	}
+
+	return twoDArray
+}
 
 // func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
@@ -147,44 +159,9 @@ import (
 // 			}
 // 		}
 
-//			return minEval, bestMove
-//		}
-//	}
-type ScoredMove struct {
-	Move  teeko.Move
-	Score int
-}
-
-func scoreMove(game *teeko.Teeko, move teeko.Move, player int32) int {
-	game.MakeMove(move)
-	score := game.Evaluate(player)
-	game.UndoMove(move)
-	return score
-}
-func topMoves(moves []teeko.Move, game *teeko.Teeko, n int, maximizingPlayer bool) []teeko.Move {
-	scoredMoves := make([]ScoredMove, len(moves))
-	currentPlayer := game.CurrentPlayer
-
-	for i, move := range moves {
-		scoredMoves[i] = ScoredMove{Move: move, Score: scoreMove(game, move, currentPlayer)}
-	}
-
-	// Sort to bring the top n moves to the front, considering maximizing or minimizing player
-	sort.Slice(scoredMoves, func(i, j int) bool {
-		if maximizingPlayer {
-			return scoredMoves[i].Score > scoredMoves[j].Score // Maximizer wants higher scores first
-		} else {
-			return scoredMoves[i].Score < scoredMoves[j].Score // Minimizer wants lower scores first
-		}
-	})
-
-	// Select and return the top n moves
-	topNMoves := make([]teeko.Move, min(n, len(scoredMoves)))
-	for i := 0; i < len(topNMoves); i++ {
-		topNMoves[i] = scoredMoves[i].Move
-	}
-	return topNMoves
-}
+// 		return minEval, bestMove
+// 	}
+// }
 
 func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
@@ -192,12 +169,10 @@ func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingP
 		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{} // Replace with your game's evaluation function
 	}
 
-	allMoves := game.GeneratePossibleMoves()
-	topNMoves := topMoves(allMoves, game, 2, maximizingPlayer)
 	var bestMove teeko.Move
 	if maximizingPlayer {
 		maxEval := math.MinInt32
-		for _, move := range topNMoves {
+		for _, move := range game.GeneratePossibleMoves() {
 			game.MakeMove(move)
 			eval, _ := MiniMaxAlphaBeta(game, depth-1, alpha, beta, false)
 			game.UndoMove(move)
