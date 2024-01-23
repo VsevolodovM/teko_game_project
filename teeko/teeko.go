@@ -6,9 +6,8 @@ import (
 )
 
 const (
-	Exact    = 0
-	Empty    = 0
-	MaxDepth = 6
+	Exact = 0
+	Empty = 0
 )
 
 type Move struct {
@@ -176,13 +175,13 @@ func (game *Teeko) IsGameOver() (bool, int32) {
 func (game *Teeko) Evaluate(player int32) int {
 	if GameOver, _ := game.IsGameOver(); GameOver {
 		if _, WinPlayer := game.IsGameOver(); WinPlayer == player {
-			return 100
+			return 1000
 		} else {
-			return -100
+			return -1000
 		}
 	}
 
-	boardValues := [25]int{0, 0, 2, 0, 0, 0, 10, 5, 10, 0, 2, 5, 5, 5, 2, 0, 10, 5, 10, 0, 0, 0, 2, 0, 0}
+	boardValues := [25]int{0, 5, 18, 5, 0, 5, 8, 20, 8, 5, 18, 20, 15, 20, 18, 5, 8, 20, 8, 5, 0, 5, 18, 5, 0}
 	score := 0
 
 	for i := 0; i < 25; i++ {

@@ -2,74 +2,62 @@ package PVS
 
 import (
 	"math"
+	"sort"
 	"teko_game/teeko"
 )
 
-// remove later
-func to2DArray(oneDArray [25]int32) [5][5]int32 {
-	var twoDArray [5][5]int32
+// func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
-	for i := 0; i < 25; i++ {
-		row := i / 5
-		col := i % 5
-		twoDArray[row][col] = oneDArray[i]
-	}
+// 	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
+// 		return game.Evaluate(game.CurrentPlayer), teeko.Move{}
+// 	}
 
-	return twoDArray
-}
+// 	var bestMove teeko.Move
+// 	isFirstMove := true
 
-func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int, maximizingPlayer bool) (int, teeko.Move) {
+// 	possibleMoves := game.GeneratePossibleMoves()
 
-	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
-		return game.Evaluate(game.CurrentPlayer), teeko.Move{}
-	}
+// 	for _, move := range possibleMoves {
+// 		game.MakeMove(move)
 
-	var bestMove teeko.Move
-	isFirstMove := true
+// 		var score int
+// 		if isFirstMove {
+// 			score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
+// 			isFirstMove = false
+// 		} else {
+// 			// Null window search
+// 			score, _ = PrincipalVariationSearch(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
+// 			if alpha < score && score < beta {
+// 				// Full re-search
+// 				score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
+// 			}
+// 		}
 
-	possibleMoves := game.GeneratePossibleMoves()
+// 		game.UndoMove(move)
 
-	for _, move := range possibleMoves {
-		game.MakeMove(move)
+// 		if maximizingPlayer {
+// 			if score > alpha {
+// 				alpha = score
+// 				bestMove = move
+// 			}
+// 		} else {
+// 			if score < beta {
+// 				beta = score
+// 				bestMove = move
+// 			}
+// 		}
 
-		var score int
-		if isFirstMove {
-			score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
-			isFirstMove = false
-		} else {
-			// Null window search
-			score, _ = PrincipalVariationSearch(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
-			if alpha < score && score < beta {
-				// Full re-search
-				score, _ = PrincipalVariationSearch(game, depth-1, alpha, beta, !maximizingPlayer)
-			}
-		}
+// 		if alpha >= beta {
+// 			break
+// 		}
+// 	}
 
-		game.UndoMove(move)
-
-		if maximizingPlayer {
-			if score > alpha {
-				alpha = score
-				bestMove = move
-			}
-		} else {
-			if score < beta {
-				beta = score
-				bestMove = move
-			}
-		}
-
-		if alpha >= beta {
-			break
-		}
-	}
-
-	if maximizingPlayer {
-		return alpha, bestMove
-	} else {
-		return beta, bestMove
-	}
-}
+// 	if maximizingPlayer {
+// 		return alpha, bestMove
+// 	} else {
+// 		return beta, bestMove
+// 	}
+// }
 
 // func BestMovePV(game *teeko.Teeko, transpositionTable map[uint64]TTEntry, player int32) teeko.Move {
 // 	current_pl := player
@@ -77,47 +65,47 @@ func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int,
 // 	return move
 // }
 
-// func PVS(game *teeko.Teeko, depth int, alpha, beta float32, maximizingPlayer bool) (float32, teeko.Move) {
+// func PVS(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
-// 	if depth == 0 || game.IsGameOver() {
-// 		//print(int(game.Evaluate()))
-// 		return game.Evaluate(), teeko.Move{} // Assuming evaluate() returns the heuristic value
-// 	}
+// if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
+// 	//print(int(game.Evaluate()))
+// 	return game.Evaluate(game.CurrentPlayer), teeko.Move{} // Assuming evaluate() returns the heuristic value
+// }
 
-// 	isPVNode := false
-// 	var bestMove teeko.Move
+// isPVNode := false
+// var bestMove teeko.Move
 
-// 	possibleMoves := game.GeneratePossibleMoves()
-// 	for _, move := range possibleMoves {
-// 		game.MakeMove(move)
-// 		var score float32
-// 		if isPVNode {
-// 			score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
-// 			score = -1 * score
-// 			if alpha < score && score < beta {
-// 				score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer)
-// 				score = -1 * score
-// 			}
-// 		} else {
-// 			score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer)
+// possibleMoves := game.GeneratePossibleMoves()
+// for _, move := range possibleMoves {
+// 	game.MakeMove(move)
+// 	var score int
+// 	if isPVNode {
+// 		score, _ = PVS(game, depth-1, -alpha-1, -alpha, !maximizingPlayer)
+// 		score = -1 * score
+// 		if alpha < score && score < beta {
+// 			score, _ = PVS(game, depth-1, -beta, -score, !maximizingPlayer)
 // 			score = -1 * score
 // 		}
-
-// 		game.UndoMove(move)
-
-// 		if score > alpha {
-// 			alpha = score
-// 			bestMove = move
-// 		}
-
-// 		if alpha >= beta {
-// 			break
-// 		}
-
-// 		isPVNode = true
+// 	} else {
+// 		score, _ = PVS(game, depth-1, -beta, -alpha, !maximizingPlayer)
+// 		score = -1 * score
 // 	}
 
-// 	return alpha, bestMove
+// 	game.UndoMove(move)
+
+// 	if score > alpha {
+// 		alpha = score
+// 		bestMove = move
+// 	}
+
+// 	if alpha >= beta {
+// 		break
+// 	}
+
+// 	isPVNode = true
+// }
+
+// return alpha, bestMove
 // }
 
 // func MiniMax(game *teeko.Teeko, depth int, maximizingPlayer bool) (int, teeko.Move) {
@@ -159,9 +147,44 @@ func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int,
 // 			}
 // 		}
 
-// 		return minEval, bestMove
-// 	}
-// }
+//			return minEval, bestMove
+//		}
+//	}
+type ScoredMove struct {
+	Move  teeko.Move
+	Score int
+}
+
+func scoreMove(game *teeko.Teeko, move teeko.Move, player int32) int {
+	game.MakeMove(move)
+	score := game.Evaluate(player)
+	game.UndoMove(move)
+	return score
+}
+func topMoves(moves []teeko.Move, game *teeko.Teeko, n int, maximizingPlayer bool) []teeko.Move {
+	scoredMoves := make([]ScoredMove, len(moves))
+	currentPlayer := game.CurrentPlayer
+
+	for i, move := range moves {
+		scoredMoves[i] = ScoredMove{Move: move, Score: scoreMove(game, move, currentPlayer)}
+	}
+
+	// Sort to bring the top n moves to the front, considering maximizing or minimizing player
+	sort.Slice(scoredMoves, func(i, j int) bool {
+		if maximizingPlayer {
+			return scoredMoves[i].Score > scoredMoves[j].Score // Maximizer wants higher scores first
+		} else {
+			return scoredMoves[i].Score < scoredMoves[j].Score // Minimizer wants lower scores first
+		}
+	})
+
+	// Select and return the top n moves
+	topNMoves := make([]teeko.Move, min(n, len(scoredMoves)))
+	for i := 0; i < len(topNMoves); i++ {
+		topNMoves[i] = scoredMoves[i].Move
+	}
+	return topNMoves
+}
 
 func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
@@ -169,10 +192,12 @@ func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingP
 		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{} // Replace with your game's evaluation function
 	}
 
+	allMoves := game.GeneratePossibleMoves()
+	topNMoves := topMoves(allMoves, game, 2, maximizingPlayer)
 	var bestMove teeko.Move
 	if maximizingPlayer {
 		maxEval := math.MinInt32
-		for _, move := range game.GeneratePossibleMoves() {
+		for _, move := range topNMoves {
 			game.MakeMove(move)
 			eval, _ := MiniMaxAlphaBeta(game, depth-1, alpha, beta, false)
 			game.UndoMove(move)
