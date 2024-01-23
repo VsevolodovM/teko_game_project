@@ -93,12 +93,12 @@ func (game *Teeko) UndoMove(move Move) {
 	}
 }
 
-func (game *Teeko) IsGameOver() bool {
+func (game *Teeko) IsGameOver() (bool, int32) {
 	// Rows
 	for row := 0; row < 5; row++ {
 		if (game.Board[row*5] == game.Board[row*5+1] && game.Board[row*5+1] == game.Board[row*5+2] && game.Board[row*5+2] == game.Board[row*5+3] && game.Board[row*5] != 0) ||
 			(game.Board[row*5+1] == game.Board[row*5+2] && game.Board[row*5+2] == game.Board[row*5+3] && game.Board[row*5+3] == game.Board[row*5+4] && game.Board[row*5+1] != 0) {
-			return true
+			return true, game.Board[row*5]
 		}
 	}
 
@@ -106,7 +106,7 @@ func (game *Teeko) IsGameOver() bool {
 	for col := 0; col < 5; col++ {
 		if (game.Board[col] == game.Board[col+5] && game.Board[col+5] == game.Board[col+10] && game.Board[col+10] == game.Board[col+15] && game.Board[col] != 0) ||
 			(game.Board[col+5] == game.Board[col+10] && game.Board[col+10] == game.Board[col+15] && game.Board[col+15] == game.Board[col+20] && game.Board[col+5] != 0) {
-			return true
+			return true, game.Board[col]
 		}
 	}
 
@@ -114,7 +114,7 @@ func (game *Teeko) IsGameOver() bool {
 	for i := 0; i < 19; i++ {
 		if i%5 != 4 {
 			if game.Board[i] == game.Board[i+1] && game.Board[i+1] == game.Board[i+5] && game.Board[i+5] == game.Board[i+6] && game.Board[i] != 0 {
-				return true
+				return true, game.Board[i]
 			}
 		}
 	}
@@ -123,7 +123,7 @@ func (game *Teeko) IsGameOver() bool {
 	for i := 0; i < 15; i++ {
 		if (i%5 != 4) && (i^5 != 0) {
 			if game.Board[i] == game.Board[i+4] && game.Board[i+4] == game.Board[i+6] && game.Board[i+6] == game.Board[i+10] && game.Board[i] != 0 {
-				return true
+				return true, game.Board[i]
 			}
 		}
 	}
@@ -131,39 +131,39 @@ func (game *Teeko) IsGameOver() bool {
 	// 8 times (normal)
 	for i := 2; i < 4; i++ {
 		if game.Board[i] == game.Board[i+3] && game.Board[i+3] == game.Board[i+11] && game.Board[i+11] == game.Board[i+14] && game.Board[i] != 0 {
-			return true
+			return true, game.Board[i]
 		}
 		next_row := i + 5
 		if game.Board[next_row] == game.Board[next_row+3] && game.Board[next_row+3] == game.Board[next_row+11] && game.Board[next_row+11] == game.Board[next_row+14] && game.Board[next_row] != 0 {
-			return true
+			return true, game.Board[next_row]
 		}
 	}
 
 	// 8 times (mirrored)
 	for i := 1; i < 3; i++ {
 		if game.Board[i] == game.Board[i+7] && game.Board[i+7] == game.Board[i+9] && game.Board[i+9] == game.Board[i+16] && game.Board[i] != 0 {
-			return true
+			return true, game.Board[i]
 		}
 		next_row := i + 5
 		if game.Board[next_row] == game.Board[next_row+7] && game.Board[next_row+7] == game.Board[next_row+9] && game.Board[next_row+9] == game.Board[next_row+16] && game.Board[next_row] != 0 {
-			return true
+			return true, game.Board[next_row]
 		}
 	}
 
 	// 2 times
 	if (game.Board[1] != 0 && game.Board[1] == 1 && game.Board[9] == 1 && game.Board[15] == 1 && game.Board[23] == 1) || (game.Board[1] != 0 && game.Board[1] == 2 && game.Board[9] == 2 && game.Board[15] == 2 && game.Board[23] == 2) {
-		return true
+		return true, game.Board[1]
 	}
 	if (game.Board[3] != 0 && game.Board[3] == 1 && game.Board[5] == 1 && game.Board[19] == 1 && game.Board[21] == 1) || (game.Board[3] != 0 && game.Board[3] == 2 && game.Board[5] == 2 && game.Board[19] == 2 && game.Board[21] == 2) {
-		return true
+		return true, game.Board[3]
 	}
 
 	// 1 time
 	if (game.Board[2] != 0 && game.Board[2] == 1 && game.Board[10] == 1 && game.Board[14] == 1 && game.Board[22] == 1) || (game.Board[2] != 0 && game.Board[2] == 2 && game.Board[10] == 2 && game.Board[14] == 2 && game.Board[22] == 2) {
-		return true
+		return true, game.Board[2]
 	}
 
-	return false
+	return false, 0
 }
 
 // func (game *Teeko) Evaluate() float32 {
@@ -174,30 +174,30 @@ func (game *Teeko) IsGameOver() bool {
 // }
 
 func (game *Teeko) Evaluate(player int32) int {
-	if game.IsGameOver() {
-		return 100
+	if GameOver, _ := game.IsGameOver(); GameOver {
+		if _, WinPlayer := game.IsGameOver(); WinPlayer == player {
+			return 100
+		} else {
+			return -100
+		}
 	}
-	count_one := 0
-	count_two := 0
-	board_values := [25]int{0, 0, 2, 0, 0, 0, 10, 5, 10, 0, 2, 5, 5, 5, 2, 0, 10, 5, 10, 0, 0, 0, 2, 0, 0}
+
+	boardValues := [25]int{0, 0, 2, 0, 0, 0, 10, 5, 10, 0, 2, 5, 5, 5, 2, 0, 10, 5, 10, 0, 0, 0, 2, 0, 0}
+	score := 0
 
 	for i := 0; i < 25; i++ {
 		if game.Board[i] == 1 {
-			count_one += board_values[i]
+			score += boardValues[i]
+		} else if game.Board[i] == 2 {
+			score -= boardValues[i]
 		}
-		if game.Board[i] == 2 {
-			count_two += board_values[i]
-		}
-
 	}
+
 	if player == 1 {
-		return count_one - count_two
+		return score
+	} else {
+		return -score
 	}
-	if player == 2 {
-		return count_two - count_one
-	}
-
-	return 0
 }
 
 func (game *Teeko) GeneratePossibleMoves() []Move {
