@@ -5,19 +5,6 @@ import (
 	"teko_game/teeko"
 )
 
-// remove later
-func to2DArray(oneDArray [25]int32) [5][5]int32 {
-	var twoDArray [5][5]int32
-
-	for i := 0; i < 25; i++ {
-		row := i / 5
-		col := i % 5
-		twoDArray[row][col] = oneDArray[i]
-	}
-
-	return twoDArray
-}
-
 // func PrincipalVariationSearch(game *teeko.Teeko, depth int, alpha int, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
 // 	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
@@ -81,7 +68,7 @@ func to2DArray(oneDArray [25]int32) [5][5]int32 {
 
 // if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
 // 	//print(int(game.Evaluate()))
-// 	return game.Evaluate(game.CurrentPlayer), teeko.Move{} // Assuming evaluate() returns the heuristic value
+// 	return game.Evaluate(game.CurrentPlayer), teeko.Move{}
 // }
 
 // isPVNode := false
@@ -124,8 +111,7 @@ func to2DArray(oneDArray [25]int32) [5][5]int32 {
 // 	if depth == 0 || game.IsGameOver() {
 
 // 		//game.CurrentPlayer = 3 - game.CurrentPlayer
-// 		return game.Evaluate(), teeko.Move{} // Assuming evaluate() returns the heuristic value
-// 	}
+// 		return game.Evaluate(), teeko.Move{}
 
 // 	var bestMove teeko.Move
 // 	if maximizingPlayer {
@@ -168,11 +154,11 @@ func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingP
 	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
 		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{}
 	}
-
+	moves := game.GeneratePossibleMoves()
 	var bestMove teeko.Move
 	if maximizingPlayer {
 		maxEval := math.MinInt32
-		for _, move := range game.GeneratePossibleMoves() {
+		for _, move := range moves {
 			game.MakeMove(move)
 			eval, _ := MiniMaxAlphaBeta(game, depth-1, alpha, beta, false)
 			game.UndoMove(move)
