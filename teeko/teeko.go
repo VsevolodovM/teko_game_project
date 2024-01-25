@@ -13,14 +13,14 @@ type Move struct {
 type Teeko struct {
 	Board         [25]int32
 	CurrentPlayer int32
-	Hash          uint64
-	ZobristTable  [25][3]uint64
+	InitialPlayer int32
 }
 
 func NewTeeko(board [25]int32, player int32) *Teeko {
 	return &Teeko{
 		Board:         board,
 		CurrentPlayer: player,
+		InitialPlayer: player,
 	}
 }
 
@@ -133,7 +133,7 @@ func (game *Teeko) IsGameOver() (bool, int32) {
 
 func (game *Teeko) Evaluate(player int32) int {
 	if GameOver, _ := game.IsGameOver(); GameOver {
-		if _, WinPlayer := game.IsGameOver(); WinPlayer != player {
+		if _, WinPlayer := game.IsGameOver(); WinPlayer == player {
 			return 1000
 		} else {
 			return -1000

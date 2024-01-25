@@ -150,9 +150,8 @@ import (
 // }
 
 func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
-
 	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
-		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{}
+		return int(game.Evaluate(game.InitialPlayer)), teeko.Move{}
 	}
 	moves := game.GeneratePossibleMoves()
 	var bestMove teeko.Move
