@@ -171,13 +171,14 @@ func (bot *Bot) AutoPlay() error {
 			// game_state := bot.GetGameStateArray()
 			if turn < 4 {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				_, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
-				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 8, math.MinInt64, math.MaxInt64, true)
+				fmt.Printf("Bot played: with %d from %d,%d to %d,%d\n", value, move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(0, 0, uint32(move.ToX), uint32(move.ToY))
 			} else {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				_, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
-				fmt.Printf("Bot played: from %d,%d to %d,%d\n", move.FromX, move.FromY, move.ToX, move.ToY)
+				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 8, math.MinInt64, math.MaxInt64, true)
+				// _, move := PVS.PrincipalVariationSearch(teeko_game, 6, math.MinInt64, math.MaxInt64, true)
+				fmt.Printf("Bot played: with %d from %d,%d to %d,%d\n", value, move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
 			}
 			// TODOEND
@@ -187,7 +188,6 @@ func (bot *Bot) AutoPlay() error {
 		case 1:
 			if opponent_wait == 0 {
 				fmt.Println("Wait for opponent to make a move!")
-				// fmt.Println(bot.GetGameStateArray())
 				opponent_wait = 1
 			}
 		case 3:

@@ -166,7 +166,7 @@ func to2DArray(oneDArray [25]int32) [5][5]int32 {
 func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingPlayer bool) (int, teeko.Move) {
 
 	if GameOver, _ := game.IsGameOver(); depth == 0 || GameOver {
-		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{} // Replace with your game's evaluation function
+		return int(game.Evaluate(game.CurrentPlayer)), teeko.Move{}
 	}
 
 	var bestMove teeko.Move
@@ -183,7 +183,7 @@ func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingP
 			}
 			alpha = max(alpha, eval)
 			if beta <= alpha {
-				break // Beta cut-off
+				break
 			}
 		}
 		return maxEval, bestMove
@@ -200,14 +200,13 @@ func MiniMaxAlphaBeta(game *teeko.Teeko, depth int, alpha, beta int, maximizingP
 			}
 			beta = min(beta, eval)
 			if beta <= alpha {
-				break // Alpha cut-off
+				break
 			}
 		}
 		return minEval, bestMove
 	}
 }
 
-// Helper functions for min and max
 func max(a, b int) int {
 	if a > b {
 		return a

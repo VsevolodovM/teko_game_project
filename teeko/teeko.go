@@ -80,13 +80,10 @@ func (game *Teeko) MakeMove(move Move) {
 // }
 
 func (game *Teeko) UndoMove(move Move) {
-	// Revert the move
 	game.CurrentPlayer = 3 - game.CurrentPlayer
 	if move.FromX == -1 && move.FromY == -1 {
-		// Revert a new piece placement
 		game.Board[move.ToY*5+move.ToX] = Empty
 	} else {
-		// Revert moving an existing piece
 		game.Board[move.FromY*5+move.FromX] = game.CurrentPlayer
 		game.Board[move.ToY*5+move.ToX] = Empty
 	}
