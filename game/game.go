@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"time"
+
 	"teko_game/pkg/netcode"
 	"teko_game/pkg/tko"
 	PVS "teko_game/principal_variation_search"
 	"teko_game/teeko"
-	"time"
 
 	"google.golang.org/grpc"
 )
@@ -59,12 +60,15 @@ func (bot *Bot) NewMatch() {
 		TimeoutSuggestionSeconds: 3600,
 		GameParameters:           &params,
 	}
+
 	response, err := bot.Client.NewMatch(context.Background(), &request)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println("NewMatch:", response.MatchToken)
 	fmt.Println("First Player?:", response.BeginningPlayer)
+
 	bot.MatchToken = response.MatchToken
 	bot.MatchIDPacket = netcode.MatchIDPacket{UserToken: bot.UserToken, MatchToken: response.MatchToken}
 	bot.BeginningPlayer = response.BeginningPlayer
@@ -156,28 +160,30 @@ func (bot *Bot) AutoPlay() error {
 		player = 2
 	}
 	teeko_game := teeko.NewTeeko([25]int32(bot.GetGameStateArray()), player)
-	// teeko_game.InitZobristTable()
 	fmt.Println("Joining the match...")
 	time.Sleep(3 * time.Second)
+
+	bot.OpponentInfo()
+	bot.ShowElo()
+
 	opponent_wait := 0
 	turn := 0
-	// var pos int32
+
 	for {
 		codeFromServer := bot.GetGameStatusCode()
 
 		switch codeFromServer {
 		case 0:
 			// TODOBEGIN: 米莎，这里还有工作要做 (+15 或 -100 学分)
-			// game_state := bot.GetGameStateArray()
+
 			if turn < 4 {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 8, math.MinInt64, math.MaxInt64, true)
+				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
 				fmt.Printf("Bot played: with %d from %d,%d to %d,%d\n", value, move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(0, 0, uint32(move.ToX), uint32(move.ToY))
 			} else {
 				teeko_game.Board = [25]int32(bot.GetGameStateArray())
-				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 8, math.MinInt64, math.MaxInt64, true)
-				// _, move := PVS.PrincipalVariationSearch(teeko_game, 6, math.MinInt64, math.MaxInt64, true)
+				value, move := PVS.MiniMaxAlphaBeta(teeko_game, 7, math.MinInt64, math.MaxInt64, true)
 				fmt.Printf("Bot played: with %d from %d,%d to %d,%d\n", value, move.FromX, move.FromY, move.ToX, move.ToY)
 				bot.SubmitTurn(uint32(move.FromX), uint32(move.FromY), uint32(move.ToX), uint32(move.ToY))
 			}
